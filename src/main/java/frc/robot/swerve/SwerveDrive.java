@@ -298,6 +298,10 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     }
   }
 
+  public double getVelocity() {
+    return frontLeftModule.getDriveMotor().get();
+  }
+
   public void setTrajectory(Trajectory trajectory) {
     field.getObject("traj").setTrajectory(trajectory);
   }
