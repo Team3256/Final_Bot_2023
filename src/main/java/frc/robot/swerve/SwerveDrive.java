@@ -40,14 +40,18 @@ import frc.robot.limelight.Limelight;
 import frc.robot.logging.DoubleSendable;
 import frc.robot.logging.Loggable;
 import frc.robot.swerve.helpers.AdaptiveSlewRateLimiter;
+import frc.robot.swerve.helpers.SwerveModSim;
 import frc.robot.swerve.helpers.SwerveModule;
+import frc.robot.swerve.helpers.SwerveModuleImpl;
+
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable {
-  private final SwerveModule frontLeftModule = new SwerveModule(0, FrontLeft.constants);
-  private final SwerveModule frontRightModule = new SwerveModule(1, FrontRight.constants);
-  private final SwerveModule backLeftModule = new SwerveModule(2, BackLeft.constants);
-  private final SwerveModule backRightModule = new SwerveModule(3, BackRight.constants);
+  private final SwerveModuleImpl frontLeftModule; // ...
+  private final SwerveModuleImpl frontRightModule;
+  private final SwerveModuleImpl backLeftModule;
+  private final SwerveModuleImpl backRightModule;
+  private final boolean isInSim = false; // idk how to check this
   private SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field = new Field2d();
@@ -58,13 +62,27 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   private final AdaptiveSlewRateLimiter adaptiveYRateLimiter =
       new AdaptiveSlewRateLimiter(kYAccelRateLimit, kYDecelRateLimit);
 
-  private final SwerveModule[] swerveModules = {
-    frontLeftModule, frontRightModule, backLeftModule, backRightModule
-  };
+  private final SwerveModuleImpl[] swerveModules;
 
   private final Pigeon2 gyro;
 
   public SwerveDrive() {
+    if (isInSim){
+      frontLeftModule = new SwerveModSim(0, FrontLeft.constants);
+      frontRightModule = new SwerveModSim(1, FrontRight.constants);
+      backLeftModule = new SwerveModSim(2, BackLeft.constants);
+      backRightModule = new SwerveModSim(3, BackRight.constants);
+    } else {
+      frontLeftModule = new SwerveModule(0, FrontLeft.constants);
+      frontRightModule = new SwerveModule(1, FrontRight.constants);
+      backLeftModule = new SwerveModule(2, BackLeft.constants);
+      backRightModule = new SwerveModule(3, BackRight.constants);
+    }
+
+    swerveModules = new SwerveModuleImpl[]{
+      frontLeftModule, frontRightModule, backLeftModule, backRightModule
+    }; // what
+
     gyro = new Pigeon2(kPigeonID, kPigeonCanBus);
     gyro.configFactoryDefault();
     zeroGyroYaw();
@@ -85,6 +103,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       SmartDashboard.putData("Limelight Localization Field", limelightLocalizationField);
       SmartDashboard.putData("Field", field);
     }
+
     /*
      * By pausing init for a second before setting module offsets, we avoid a bug
      * with inverting motors.
@@ -95,7 +114,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   }
 
   public void resetModulesToAbsolute() {
-    for (SwerveModule mod : swerveModules) {
+    for (SwerveModuleImpl mod : swerveModules) {
       mod.resetToAbsolute();
     }
   }
@@ -124,7 +143,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxSpeed);
 
-    for (SwerveModule mod : swerveModules) {
+    for (SwerveModuleImpl mod : swerveModules) {
       mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
     }
     Logger.getInstance().recordOutput("SwerveModuleStates", swerveModuleStates);
@@ -142,8 +161,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   }
 
   public void setDesiredAngleState(SwerveModuleState[] swerveModuleStates) {
-    for (SwerveModule mod : swerveModules) {
-      mod.setDesiredAngleState(swerveModuleStates[mod.moduleNumber]);
+    for (SwerveModuleImpl mod : swerveModules) {
+      mod.setDesiredAngleState(swerveModuleStates[SwerveModuleImpl.moduleNumber]);
     }
   }
 
@@ -151,7 +170,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, kMaxSpeed);
 
-    for (SwerveModule mod : swerveModules) {
+    for (SwerveModuleImpl mod : swerveModules) {
       mod.setDesiredState(desiredStates[mod.moduleNumber], false);
     }
   }
@@ -166,7 +185,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
   public SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
-    for (SwerveModule mod : swerveModules) {
+    for (SwerveModuleImpl mod : swerveModules) {
       states[mod.moduleNumber] = mod.getPosition();
     }
     return states;
@@ -268,9 +287,9 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       field.setRobotPose(poseEstimator.getEstimatedPosition());
       Logger.getInstance().recordOutput("Odometry", getPose());
 
-      for (SwerveModule mod : swerveModules) {
+      for (SwerveModuleImpl mod : swerveModules) {
         SmartDashboard.putNumber(
-            "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+            "Mod " + SwerveModuleImpl.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
         SmartDashboard.putNumber(
             "Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
       }
@@ -323,7 +342,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   public boolean CANTest() {
     System.out.println("Testing drivetrain CAN:");
     boolean result = true;
-    for (SwerveModule device : swerveModules) {
+    for (SwerveModuleImpl device : swerveModules) {
       result &= device.test();
     }
     result &= CANDeviceTester.testPigeon(gyro);
@@ -333,14 +352,14 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   }
 
   public void setDriveMotorsNeutralMode(NeutralMode neutralMode) {
-    for (SwerveModule swerveModule : swerveModules) {
+    for (SwerveModuleImpl swerveModule : swerveModules) {
       swerveModule.setDriveMotorNeutralMode(neutralMode);
     }
   }
 
   public void setAngleMotorsNeutralMode(NeutralMode neutralMode) {
-    for (SwerveModule swerveModule : swerveModules) {
-      swerveModule.setAngleMotorNeutralMode(neutralMode);
+    for (SwerveModuleImpl swerveModule : swerveModules) {
+      swerveModule.setDriveMotorNeutralMode(neutralMode);
     }
   }
 

@@ -13,6 +13,7 @@ import static frc.robot.swerve.SwerveConstants.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.WPI_CANCoder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -26,11 +27,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.logging.Loggable;
 
-public class SwerveModule implements Loggable, SwerveModuleImpl {
+public class SwerveModSim implements Loggable, SwerveModuleImpl {
   public int moduleNumber;
   private WPI_TalonFX mAngleMotor;
   private WPI_TalonFX mDriveMotor;
   private WPI_CANCoder angleEncoder;
+  private TalonFXSimCollection angleMotorSim;
+  private TalonFXSimCollection driveMotorSim;
   private Rotation2d angleOffset;
   private Rotation2d lastAngle;
 
@@ -38,20 +41,27 @@ public class SwerveModule implements Loggable, SwerveModuleImpl {
 
   SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(kDriveKS, kDriveKV, kDriveKA);
 
-  public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants) {
+  public SwerveModSim(int moduleNumber, SwerveModuleConstants moduleConstants) {
     this.moduleNumber = moduleNumber;
     this.angleOffset = moduleConstants.angleOffset;
 
-    /* Angle Encoder Config */
-    angleEncoder = new WPI_CANCoder(moduleConstants.cancoderID);
-    configAngleEncoder();
-
     /* Angle Motor Config */
     mAngleMotor = new WPI_TalonFX(moduleConstants.angleMotorID);
+    // Setup the SimCollection for the angle motor
+    angleMotorSim = mAngleMotor.getSimCollection();
     configAngleMotor();
+
+        
+    /* Angle Encoder Config */
+    angleEncoder = new WPI_CANCoder(moduleConstants.cancoderID);
+    // Setup the SimCollection for the angle encoder - link to the AngleMotorSim
+    // angleEncoder.setSimCollection(angleMotorSim);
+    configAngleEncoder();
 
     /* Drive Motor Config */
     mDriveMotor = new WPI_TalonFX(moduleConstants.driveMotorID);
+    // Setup the SimCollection for the drive motor
+    driveMotorSim = mDriveMotor.getSimCollection();
     configDriveMotor();
 
     lastAngle = getState().angle;
