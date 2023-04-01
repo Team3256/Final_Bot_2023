@@ -26,8 +26,8 @@ import frc.robot.elevator.Elevator;
 import frc.robot.elevator.Elevator.ElevatorPreset;
 import frc.robot.elevator.commands.SetElevatorHeight;
 import frc.robot.intake.Intake;
-import frc.robot.intake.commands.IntakeCone;
-import frc.robot.intake.commands.IntakeCube;
+import frc.robot.intake.commands.GroundIntakeCone;
+import frc.robot.intake.commands.GroundIntakeCube;
 import frc.robot.led.LED;
 import frc.robot.led.commands.LEDSetAllSectionsPattern;
 import frc.robot.led.patterns.*;
@@ -110,8 +110,8 @@ public class AutoScore extends CommandBase {
 
     Command runOuttake =
         new ConditionalCommand(
-            new IntakeCube(intakeSubsystem, ledSubsystem),
-            new IntakeCone(intakeSubsystem, ledSubsystem),
+            new GroundIntakeCube(intakeSubsystem, ledSubsystem),
+            new GroundIntakeCone(intakeSubsystem, ledSubsystem),
             isCurrentPieceCone);
     Command stow = new StowArmElevator(elevatorSubsystem, armSubsystem);
     // Set arm and elevator command and end pose based on node type and height

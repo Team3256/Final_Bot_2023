@@ -8,29 +8,34 @@
 package frc.robot.intake.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.intake.Intake;
+import frc.robot.helpers.TimedBoolean;
+import frc.robot.intake.GroundIntake;
 import frc.robot.led.LED;
 import frc.robot.led.commands.LEDSetAllSectionsPattern;
 import frc.robot.led.patterns.SuccessPattern;
 
-public class IntakeCube extends CommandBase {
-  private Intake intakeSubsystem;
+public class GroundIntakeCone extends CommandBase {
+  private GroundIntake intakeSubsystem;
   private LED ledSubsystem;
+  private TimedBoolean isCurrentSpiking;
 
-  public IntakeCube(Intake intakeSubsystem) {
+  public GroundIntakeCone(GroundIntake intakeSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
+    this.isCurrentSpiking = new TimedBoolean(intakeSubsystem::isCurrentSpiking, 1);
+
     addRequirements(intakeSubsystem);
   }
 
-  public IntakeCube(Intake intakeSubsystem, LED ledSubsystem) {
+  public GroundIntakeCone(GroundIntake intakeSubsystem, LED ledSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
     this.ledSubsystem = ledSubsystem;
+
     addRequirements(intakeSubsystem);
   }
 
   @Override
   public void initialize() {
-    intakeSubsystem.intakeCube();
+    intakeSubsystem.intakeCone();
   }
 
   @Override
@@ -43,6 +48,7 @@ public class IntakeCube extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return intakeSubsystem.isCurrentSpiking();
+    isCurrentSpiking.update();
+    return isCurrentSpiking.hasBeenTrueForThreshold();
   }
 }

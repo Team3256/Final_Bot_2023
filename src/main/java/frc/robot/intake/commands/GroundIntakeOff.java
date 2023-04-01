@@ -8,12 +8,13 @@
 package frc.robot.intake.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.intake.GroundIntake;
 import frc.robot.intake.Intake;
 
-public class IntakeOff extends CommandBase {
-  private final Intake intakeSubsystem;
+public class GroundIntakeOff extends CommandBase {
+  private final GroundIntake intakeSubsystem;
 
-  public IntakeOff(Intake intakeSubsystem) {
+  public GroundIntakeOff(GroundIntake intakeSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
     addRequirements(intakeSubsystem);
   }

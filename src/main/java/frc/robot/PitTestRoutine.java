@@ -22,16 +22,17 @@ import frc.robot.arm.commands.SetArmAngle;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.commands.SetElevatorHeight;
 import frc.robot.elevator.commands.ZeroElevator;
+import frc.robot.intake.GroundIntake;
 import frc.robot.intake.Intake;
-import frc.robot.intake.commands.IntakeCone;
-import frc.robot.intake.commands.IntakeCube;
+import frc.robot.intake.commands.GroundIntakeCone;
+import frc.robot.intake.commands.GroundIntakeCube;
 import frc.robot.swerve.SwerveDrive;
 import frc.robot.swerve.commands.LockSwerveX;
 import frc.robot.swerve.commands.TeleopSwerve;
 
 public class PitTestRoutine {
   Elevator elevatorSubsystem;
-  Intake intakeSubsystem;
+  GroundIntake intakeSubsystem;
   SwerveDrive swerveSubsystem;
   Arm armSubsystem;
   private final CommandXboxController driver = new CommandXboxController(0);
@@ -100,10 +101,10 @@ public class PitTestRoutine {
   }
 
   public Command intakeCommands() {
-    Command intakeCone = new IntakeCone(intakeSubsystem).until(driver.b());
-    Command outtakeCone = new IntakeCube(intakeSubsystem).until(driver.b());
-    Command intakeCube = new IntakeCube(intakeSubsystem).until(driver.b());
-    Command outtakeCube = new IntakeCone(intakeSubsystem).until(driver.b());
+    Command intakeCone = new GroundIntakeCone(intakeSubsystem).until(driver.b());
+    Command outtakeCone = new GroundIntakeCube(intakeSubsystem).until(driver.b());
+    Command intakeCube = new GroundIntakeCube(intakeSubsystem).until(driver.b());
+    Command outtakeCube = new GroundIntakeCone(intakeSubsystem).until(driver.b());
 
     return new SequentialCommandGroup(intakeCone, outtakeCone, intakeCube, outtakeCube);
   }

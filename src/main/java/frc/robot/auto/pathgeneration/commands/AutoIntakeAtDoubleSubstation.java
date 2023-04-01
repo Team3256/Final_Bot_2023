@@ -25,9 +25,9 @@ import frc.robot.auto.pathgeneration.PathGeneration;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.commands.SetElevatorHeight;
 import frc.robot.intake.Intake;
-import frc.robot.intake.commands.IntakeCone;
-import frc.robot.intake.commands.IntakeCube;
-import frc.robot.intake.commands.IntakeOff;
+import frc.robot.intake.commands.GroundIntakeCone;
+import frc.robot.intake.commands.GroundIntakeCube;
+import frc.robot.intake.commands.GroundIntakeOff;
 import frc.robot.led.LED;
 import frc.robot.led.commands.LEDSetAllSectionsPattern;
 import frc.robot.led.patterns.Blink.ErrorPatternBlink;
@@ -129,13 +129,13 @@ public class AutoIntakeAtDoubleSubstation extends CommandBase {
 
     Command runIntake =
         new ConditionalCommand(
-            new IntakeCone(intakeSubsystem, ledSubsystem),
-            new IntakeCube(intakeSubsystem, ledSubsystem),
+            new GroundIntakeCone(intakeSubsystem, ledSubsystem),
+            new GroundIntakeCube(intakeSubsystem, ledSubsystem),
             isCurrentPieceCone);
     Command moveToSubstation =
         PathGeneration.createDynamicAbsolutePath(
             substationWaypoint, end, swerveSubsystem, kPathToDestinationConstraints);
-    Command stopIntake = new IntakeOff(intakeSubsystem);
+    Command stopIntake = new GroundIntakeOff(intakeSubsystem);
     Command stowArmElevator = new StowArmElevator(elevatorSubsystem, armSubsystem, 0, 1);
     Command moveAwayFromSubstation =
         PathGeneration.createDynamicAbsolutePath(

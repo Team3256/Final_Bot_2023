@@ -13,10 +13,8 @@ import static frc.robot.Constants.kDebugEnabled;
 import static frc.robot.intake.IntakeConstants.*;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -24,33 +22,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
-import frc.robot.drivers.TalonFXFactory;
-import frc.robot.intake.commands.IntakeCone;
-import frc.robot.intake.commands.IntakeCube;
+import frc.robot.intake.commands.GroundIntakeCone;
+import frc.robot.intake.commands.GroundIntakeCube;
 import frc.robot.logging.Loggable;
 
 public class Intake extends SubsystemBase implements Loggable, CANTestable {
   private WPI_TalonFX intakeMotor;
 
-  public Intake() {
-    if (RobotBase.isReal()) {
-      configureRealHardware();
-    } else {
-      configureSimHardware();
-    }
-    off();
-    System.out.println("Intake initialized");
-  }
 
-  private void configureRealHardware() {
-    intakeMotor = TalonFXFactory.createDefaultTalon(kIntakeCANDevice);
-    intakeMotor.setNeutralMode(NeutralMode.Brake);
-  }
 
-  private void configureSimHardware() {
-    intakeMotor = new WPI_TalonFX(kIntakeMotorID);
-    intakeMotor.setNeutralMode(NeutralMode.Brake);
-  }
+
 
   public double getIntakeSpeed() {
     return intakeMotor.getMotorOutputPercent();
@@ -87,10 +68,7 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
     return intakeMotor.getStatorCurrent() > kIntakeMaxCurrent;
   }
 
-  public void off() {
-    System.out.println("Intake off");
-    intakeMotor.neutralOutput();
-  }
+
 
   @Override
   public void periodic() {
@@ -100,8 +78,8 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
 
   public void logInit() {
     getLayout(kDriverTabName).add(this);
-    getLayout(kDriverTabName).add(new IntakeCube(this));
-    getLayout(kDriverTabName).add(new IntakeCone(this));
+    //getLayout(kDriverTabName).add(new GroundIntakeCube(this));
+    //getLayout(kDriverTabName).add(new GroundIntakeCone(this));
     getLayout(kDriverTabName).add(intakeMotor);
   }
 

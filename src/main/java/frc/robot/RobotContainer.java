@@ -34,9 +34,10 @@ import frc.robot.climb.commands.DeployClimb;
 import frc.robot.climb.commands.RetractClimb;
 import frc.robot.drivers.CANTestable;
 import frc.robot.elevator.Elevator;
+import frc.robot.intake.GroundIntake;
 import frc.robot.intake.Intake;
-import frc.robot.intake.commands.IntakeCone;
-import frc.robot.intake.commands.IntakeCube;
+import frc.robot.intake.commands.GroundIntakeCone;
+import frc.robot.intake.commands.GroundIntakeCube;
 import frc.robot.intake.commands.LatchGamePiece;
 import frc.robot.led.LED;
 import frc.robot.led.commands.*;
@@ -68,7 +69,7 @@ public class RobotContainer implements CANTestable, Loggable {
   private final CommandXboxController operator = new CommandXboxController(1);
 
   private SwerveDrive swerveSubsystem;
-  private Intake intakeSubsystem;
+  private GroundIntake intakeSubsystem;
   private Elevator elevatorSubsystem;
   private Arm armSubsystem;
   private Climb climbSubsystem;
@@ -83,7 +84,7 @@ public class RobotContainer implements CANTestable, Loggable {
 
   public RobotContainer() {
     if (kArmEnabled) armSubsystem = new Arm();
-    if (kIntakeEnabled) intakeSubsystem = new Intake();
+    if (kIntakeEnabled) intakeSubsystem = new GroundIntake();
     if (kElevatorEnabled) elevatorSubsystem = new Elevator();
     if (kSwerveEnabled) swerveSubsystem = new SwerveDrive();
     if (kClimbEnabled) climbSubsystem = new Climb();
@@ -238,8 +239,8 @@ public class RobotContainer implements CANTestable, Loggable {
         .or(driver.b())
         .whileTrue(
             new ConditionalCommand(
-                new IntakeCube(intakeSubsystem),
-                new IntakeCone(intakeSubsystem),
+                new GroundIntakeCube(intakeSubsystem),
+                new GroundIntakeCone(intakeSubsystem),
                 this::isCurrentPieceCone));
   }
 
@@ -289,8 +290,8 @@ public class RobotContainer implements CANTestable, Loggable {
           .or(operator.povDown())
           .whileTrue(
               new ConditionalCommand(
-                  new IntakeCone(intakeSubsystem),
-                  new IntakeCube(intakeSubsystem),
+                  new GroundIntakeCone(intakeSubsystem),
+                  new GroundIntakeCube(intakeSubsystem),
                   this::isCurrentPieceCone));
     }
   }

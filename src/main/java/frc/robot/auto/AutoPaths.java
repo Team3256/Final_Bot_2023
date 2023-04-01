@@ -24,10 +24,10 @@ import frc.robot.auto.helpers.AutoChooser;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.commands.SetElevatorHeight;
 import frc.robot.elevator.commands.ZeroElevator;
-import frc.robot.intake.Intake;
-import frc.robot.intake.commands.IntakeCone;
-import frc.robot.intake.commands.IntakeCube;
-import frc.robot.intake.commands.IntakeOff;
+import frc.robot.intake.GroundIntake;
+import frc.robot.intake.commands.GroundIntakeCone;
+import frc.robot.intake.commands.GroundIntakeCube;
+import frc.robot.intake.commands.GroundIntakeOff;
 import frc.robot.swerve.SwerveDrive;
 import frc.robot.swerve.commands.AutoBalance;
 import frc.robot.swerve.commands.LockSwerveX;
@@ -37,14 +37,14 @@ import java.util.function.Supplier;
 
 public class AutoPaths {
   private SwerveDrive swerveSubsystem;
-  private Intake intakeSubsystem;
+  private GroundIntake intakeSubsystem;
   private Elevator elevatorSubsystem;
   private Arm armSubsystem;
   private HashMap<String, Supplier<Command>> autoEventMap = new HashMap<>();
 
   public AutoPaths(
       SwerveDrive swerveSubsystem,
-      Intake intakeSubsystem,
+      GroundIntake intakeSubsystem,
       Elevator elevatorSubsystem,
       Arm armSubsystem) {
     this.swerveSubsystem = swerveSubsystem;
@@ -70,7 +70,7 @@ public class AutoPaths {
             runParallelWithPath(
                 Commands.parallel(
                         new StowArmElevator(elevatorSubsystem, armSubsystem),
-                        new IntakeOff(intakeSubsystem))
+                        new GroundIntakeOff(intakeSubsystem))
                     .asProxy()
                     .withName("defaultPosition")));
     autoEventMap.put(
@@ -78,7 +78,7 @@ public class AutoPaths {
         () ->
             runParallelWithPath(
                     Commands.deadline(
-                        new IntakeCone(intakeSubsystem),
+                        new GroundIntakeCone(intakeSubsystem),
                         new SetElevatorHeight(
                             elevatorSubsystem, Elevator.ElevatorPreset.GROUND_INTAKE),
                         new SetArmAngle(armSubsystem, ArmPreset.GROUND_INTAKE)))
@@ -90,7 +90,7 @@ public class AutoPaths {
         () ->
             runParallelWithPath(
                     Commands.deadline(
-                        new IntakeCube(intakeSubsystem),
+                        new GroundIntakeCube(intakeSubsystem),
                         new SetElevatorHeight(
                             elevatorSubsystem, Elevator.ElevatorPreset.GROUND_INTAKE),
                         new SetArmAngle(armSubsystem, ArmPreset.GROUND_INTAKE)))
@@ -102,7 +102,7 @@ public class AutoPaths {
             Commands.parallel(
                     new SetElevatorHeight(elevatorSubsystem, Elevator.ElevatorPreset.CUBE_HIGH),
                     new SetArmAngle(armSubsystem, ArmPreset.CUBE_HIGH))
-                .andThen(new IntakeCone(intakeSubsystem))
+                .andThen(new GroundIntakeCone(intakeSubsystem))
                 .asProxy()
                 .withName("cubeHigh"));
     autoEventMap.put(
@@ -111,7 +111,7 @@ public class AutoPaths {
             Commands.parallel(
                     new SetElevatorHeight(elevatorSubsystem, Elevator.ElevatorPreset.CONE_HIGH),
                     new SetArmAngle(armSubsystem, ArmPreset.CONE_HIGH))
-                .andThen(new IntakeCube(intakeSubsystem))
+                .andThen(new GroundIntakeCube(intakeSubsystem))
                 .asProxy()
                 .withName("coneHigh"));
     autoEventMap.put(
@@ -120,7 +120,7 @@ public class AutoPaths {
             Commands.parallel(
                     new SetElevatorHeight(elevatorSubsystem, Elevator.ElevatorPreset.ANY_PIECE_MID),
                     new SetArmAngle(armSubsystem, ArmPreset.CUBE_MID))
-                .andThen(new IntakeCone(intakeSubsystem))
+                .andThen(new GroundIntakeCone(intakeSubsystem))
                 .asProxy()
                 .withName("cubeMid"));
     autoEventMap.put(
@@ -129,7 +129,7 @@ public class AutoPaths {
             Commands.parallel(
                     new SetElevatorHeight(elevatorSubsystem, Elevator.ElevatorPreset.ANY_PIECE_MID),
                     new SetArmAngle(armSubsystem, ArmPreset.CONE_MID))
-                .andThen(new IntakeCube(intakeSubsystem))
+                .andThen(new GroundIntakeCube(intakeSubsystem))
                 .asProxy()
                 .withName("coneMid"));
     autoEventMap.put(
@@ -138,7 +138,7 @@ public class AutoPaths {
             Commands.parallel(
                     new SetElevatorHeight(elevatorSubsystem, Elevator.ElevatorPreset.ANY_PIECE_LOW),
                     new SetArmAngle(armSubsystem, ArmPreset.ANY_PIECE_LOW))
-                .andThen(new IntakeCone(intakeSubsystem))
+                .andThen(new GroundIntakeCone(intakeSubsystem))
                 .asProxy()
                 .withName("cubeLow"));
     autoEventMap.put(
@@ -147,7 +147,7 @@ public class AutoPaths {
             Commands.parallel(
                     new SetElevatorHeight(elevatorSubsystem, Elevator.ElevatorPreset.ANY_PIECE_LOW),
                     new SetArmAngle(armSubsystem, ArmPreset.ANY_PIECE_LOW))
-                .andThen(new IntakeCube(intakeSubsystem))
+                .andThen(new GroundIntakeCube(intakeSubsystem))
                 .asProxy()
                 .withName("coneLow"));
     autoEventMap.put(
@@ -164,7 +164,7 @@ public class AutoPaths {
             Commands.parallel(
                     new ZeroElevator(elevatorSubsystem),
                     new SetArmAngle(armSubsystem, ArmPreset.CUBE_HIGH))
-                .andThen(new IntakeCone(intakeSubsystem))
+                .andThen(new GroundIntakeCone(intakeSubsystem))
                 .asProxy()
                 .withName("scorePreload");
     Supplier<Command> scorePreloadCone =
@@ -172,7 +172,7 @@ public class AutoPaths {
             Commands.parallel(
                     new ZeroElevator(elevatorSubsystem),
                     new SetArmAngle(armSubsystem, ArmPreset.CONE_HIGH))
-                .andThen(new IntakeCone(intakeSubsystem))
+                .andThen(new GroundIntakeCone(intakeSubsystem))
                 .asProxy()
                 .withName("scorePreload");
 
