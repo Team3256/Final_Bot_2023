@@ -16,8 +16,16 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import frc.robot.swerve.helpers.COTSFalconSwerveConstants;
 import frc.robot.swerve.helpers.SwerveModuleConstants;
+import frc.robot.swerve.helpers.TrainingDataPoint;
+import java.util.List;
 
 public final class SwerveConstants {
+
+  public static final List<TrainingDataPoint> kSwervePoseEstimatorData =
+      List.of(new TrainingDataPoint(0, 0, 0));
+  public static final double kSwervePoseEstimatorMinValue = 0;
+  public static final double kSwervePoseEstimatorMaxValue = 0;
+
   public static final int kPigeonID = 1;
   public static final String kPigeonCanBus = "mani";
 
@@ -39,9 +47,11 @@ public final class SwerveConstants {
       COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
   /* Drivetrain Constants */
-  //public static final double kTrackWidth = Units.inchesToMeters(20.25);
-  //public static final double kTrackWidth = Units.inchesToMeters(26.945); // Truncated from: 26.945580
-  public static final double kTrackWidth = Units.inchesToMeters(37.188); // Truncated from: 37.188158
+  // public static final double kTrackWidth = Units.inchesToMeters(20.25);
+  // public static final double kTrackWidth = Units.inchesToMeters(26.945); // Truncated from:
+  // 26.945580
+  public static final double kTrackWidth =
+      Units.inchesToMeters(37.188); // Truncated from: 37.188158
   // public static final double kWheelBase = Units.inchesToMeters(20.25);
   public static final double kWheelBase = Units.inchesToMeters(24.25); // 24.250000
   public static final double kWheelDiameter = 0.1016;

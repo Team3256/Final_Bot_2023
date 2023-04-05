@@ -13,6 +13,9 @@ import static frc.robot.swerve.SwerveConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.Pigeon2;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,6 +26,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
@@ -41,6 +46,8 @@ import frc.robot.logging.DoubleSendable;
 import frc.robot.logging.Loggable;
 import frc.robot.swerve.helpers.AdaptiveSlewRateLimiter;
 import frc.robot.swerve.helpers.SwerveModule;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable {
@@ -48,7 +55,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   private final SwerveModule frontRightModule = new SwerveModule(1, FrontRight.constants);
   private final SwerveModule backLeftModule = new SwerveModule(2, BackLeft.constants);
   private final SwerveModule backRightModule = new SwerveModule(3, BackRight.constants);
-  private SwerveDrivePoseEstimator poseEstimator;
+  private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field = new Field2d();
   private final Field2d limelightLocalizationField = new Field2d();
@@ -63,6 +70,23 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   };
 
   private final Pigeon2 gyro;
+
+  private static final PolynomialSplineFunction distancetostdDevTranslation;
+  private static final PolynomialSplineFunction distancetostdDevAngle;
+
+  static {
+    double[] trainDistance = new double[kSwervePoseEstimatorData.size()];
+    double[] trainStdDevTranslation = new double[kSwervePoseEstimatorData.size()];
+    double[] trainStdDevAngle = new double[kSwervePoseEstimatorData.size()];
+    for (int i = 0; i < kSwervePoseEstimatorData.size(); i++) {
+      trainDistance[i] = kSwervePoseEstimatorData.get(i).distance;
+      trainStdDevTranslation[i] = kSwervePoseEstimatorData.get(i).stdDevTranslation;
+      trainStdDevAngle[i] = kSwervePoseEstimatorData.get(i).stdDevAngle;
+    }
+    distancetostdDevTranslation =
+        new LinearInterpolator().interpolate(trainDistance, trainStdDevTranslation);
+    distancetostdDevAngle = new LinearInterpolator().interpolate(trainDistance, trainStdDevAngle);
+  }
 
   public SwerveDrive() {
     gyro = new Pigeon2(kPigeonID, kPigeonCanBus);
@@ -242,10 +266,18 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
         Pose2d limelightPose = new Pose2d(new Translation2d(tx, ty), Rotation2d.fromDegrees(rz));
 
+        Matrix<N3, N1> visionMeasurementStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
+        visionMeasurementStdDevs.set(0, 0, getStdDevTranslation(limelightPose.getX()));
+        visionMeasurementStdDevs.set(1, 0, getStdDevTranslation(limelightPose.getY()));
+        visionMeasurementStdDevs.set(
+            2, 0, getStdDevAngle(limelightPose.getRotation().getDegrees()));
+
         if (shouldAddVisionMeasurement(
             limelightPose, LimelightTranslationThresholdMeters, LimelightRotationThreshold)) {
           poseEstimator.addVisionMeasurement(
-              limelightPose, Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl));
+              limelightPose,
+              Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl),
+              visionMeasurementStdDevs);
         }
 
         if (Constants.kDebugEnabled) {
@@ -342,6 +374,21 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     for (SwerveModule swerveModule : swerveModules) {
       swerveModule.setAngleMotorNeutralMode(neutralMode);
     }
+  }
+
+  public double getStdDevTranslation(double distance) {
+    return distancetostdDevTranslation.value(clampDistanceForInterpolation(distance));
+  }
+
+  public double getStdDevAngle(double distance) {
+    return distancetostdDevAngle.value(clampDistanceForInterpolation(distance));
+  }
+
+  public double clampDistanceForInterpolation(double distance) {
+    if (distance == 0) {
+      return kSwervePoseEstimatorMaxValue;
+    }
+    return MathUtil.clamp(distance, kSwervePoseEstimatorMinValue, kSwervePoseEstimatorMaxValue);
   }
 
   public boolean isTiltedForward() {
