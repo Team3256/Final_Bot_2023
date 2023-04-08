@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.FeatureFlags;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
 import frc.robot.drivers.TalonFXFactory;
@@ -45,9 +46,10 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     ANY_PIECE_MID(ElevatorConstants.kAnyPieceMidPositionMeters),
     ANY_PIECE_LOW(ElevatorConstants.kAnyPieceLowPositionMeters),
     GROUND_INTAKE(ElevatorConstants.kGroundIntakePositionMeters),
-    DOUBLE_SUBSTATION(ElevatorConstants.kDoubleSubstationPositionMeters);
+    DOUBLE_SUBSTATION_CONE(ElevatorConstants.kDoubleSubstationPositionConeMeters),
+    DOUBLE_SUBSTATION_CUBE(ElevatorConstants.kDoubleSubstationPositionCubeMeters);
 
-    public double position;
+    public final double position;
 
     private ElevatorPreset(double position) {
       this.position = position;
@@ -55,6 +57,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
   }
 
   private WPI_TalonFX elevatorMotor;
+  private WPI_TalonFX elevatorFollowerMotor;
   private ElevatorFeedforward elevatorFeedforward =
       new ElevatorFeedforward(kElevatorS, kElevatorG, kElevatorV, kElevatorA);
 
@@ -67,13 +70,13 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
           kMinHeight,
           kMaxHeight,
           true);
-
-  private final Mechanism2d mechanism2d = new Mechanism2d(20, 50);
+  // TODO: use the same canvas for all mechanisms
+  private final Mechanism2d mechanism2d = new Mechanism2d(50, 50);
   private final MechanismRoot2d mechanism2dRoot = mechanism2d.getRoot("Elevator Root", 10, 0);
   private final MechanismLigament2d elevatorMech2d =
       mechanism2dRoot.append(
           new MechanismLigament2d(
-              "elevator", Units.metersToInches(elevatorSim.getPositionMeters()), 90));
+              "elevator", Units.metersToInches(elevatorSim.getPositionMeters()), 35.4));
 
   public Elevator() {
     if (RobotBase.isReal()) {
@@ -87,7 +90,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
   }
 
   private void configureSimHardware() {
-    elevatorMotor = new WPI_TalonFX(kElevatorID);
+    elevatorMotor = new WPI_TalonFX(kElevatorMasterID);
     SmartDashboard.putData("Elevator Sim", mechanism2d);
     elevatorMotor.setNeutralMode(NeutralMode.Brake);
   }
@@ -96,6 +99,10 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     elevatorMotor = TalonFXFactory.createDefaultTalon(kElevatorCANDevice);
     elevatorMotor.setInverted(kElevatorInverted);
     elevatorMotor.setNeutralMode(NeutralMode.Brake);
+
+    elevatorFollowerMotor =
+        TalonFXFactory.createPermanentFollowerTalon(kElevatorFollowerCANDevice, kElevatorCANDevice);
+    elevatorFollowerMotor.setNeutralMode(NeutralMode.Brake);
   }
 
   public boolean isMotorCurrentSpiking() {
@@ -183,10 +190,14 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     return result;
   }
 
-  public double getPreferencesSetpoint(Elevator.ElevatorPreset setpoint) {
-    return Preferences.getDouble(
-        ElevatorPreferencesKeys.kElevatorPositionKeys.get(setpoint),
-        ElevatorPreferencesKeys.kElevatorPositionDefaults.get(setpoint));
+  public double getElevatorSetpoint(Elevator.ElevatorPreset setpoint) {
+    if (FeatureFlags.kUsePrefs) {
+      return Preferences.getDouble(
+          ElevatorPreferencesKeys.kElevatorPositionKeys.get(setpoint),
+          ElevatorPreferencesKeys.kElevatorPositionDefaults.get(setpoint));
+    } else {
+      return setpoint.position;
+    }
   }
 
   /** Populating elevator preferences on network tables */
@@ -210,7 +221,10 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
         kElevatorPositionKeys.get(Elevator.ElevatorPreset.GROUND_INTAKE),
         kGroundIntakePositionMeters);
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.DOUBLE_SUBSTATION),
-        kDoubleSubstationPositionMeters);
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CUBE),
+        kDoubleSubstationPositionCubeMeters);
+    Preferences.initDouble(
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CONE),
+        kDoubleSubstationPositionConeMeters);
   }
 }

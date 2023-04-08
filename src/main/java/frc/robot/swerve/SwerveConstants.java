@@ -27,11 +27,11 @@ public final class SwerveConstants {
   public static final double kSwervePitTestSpeed = 0.3;
 
   /* Meters per second squared */
-  public static int kXAccelRateLimit = 10;
-  public static int kXDecelRateLimit = 7;
+  public static int kXAccelRateLimit = 8;
+  public static int kXDecelRateLimit = 14;
 
-  public static int kYAccelRateLimit = 10;
-  public static int kYDecelRateLimit = 7;
+  public static int kYAccelRateLimit = 8;
+  public static int kYDecelRateLimit = 14;
 
   public static double kAutoEngageLimitVelocity = 1;
 
@@ -39,8 +39,11 @@ public final class SwerveConstants {
       COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
   /* Drivetrain Constants */
-  public static final double kTrackWidth = Units.inchesToMeters(24.25);
-  public static final double kWheelBase = Units.inchesToMeters(24.25);
+  //public static final double kTrackWidth = Units.inchesToMeters(20.25);
+  //public static final double kTrackWidth = Units.inchesToMeters(26.945); // Truncated from: 26.945580
+  public static final double kTrackWidth = Units.inchesToMeters(37.188); // Truncated from: 37.188158
+  // public static final double kWheelBase = Units.inchesToMeters(20.25);
+  public static final double kWheelBase = Units.inchesToMeters(24.25); // 24.250000
   public static final double kWheelDiameter = 0.1016;
   public static final double kWheelCircumference = kWheelDiameter * Math.PI;
 
@@ -184,6 +187,6 @@ public final class SwerveConstants {
   public static final double kSensitivityScale = 0.3;
 
   /* AutoBalance */
-  public static double kXAutoBalanceVelocityMeters = 1;
-  public static final Rotation2d kAutoBalanceMaxError = new Rotation2d(Units.degreesToRadians(5));
+  public static double kXAutoBalanceVelocityMeters = 0.7;
+  public static final Rotation2d kAutoBalanceMaxError = new Rotation2d(Units.degreesToRadians(10));
 }

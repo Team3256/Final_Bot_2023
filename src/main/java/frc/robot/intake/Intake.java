@@ -44,9 +44,6 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
 
   private void configureRealHardware() {
     intakeMotor = TalonFXFactory.createDefaultTalon(kIntakeCANDevice);
-    intakeMotor.configStatorCurrentLimit(
-        new StatorCurrentLimitConfiguration(
-            true, kGamePieceMaxCurrent, kIntakeMaxCurrent, kTriggerThresholdTime));
     intakeMotor.setNeutralMode(NeutralMode.Brake);
   }
 
@@ -60,32 +57,43 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
   }
 
   public void latchCone() {
-    if (kDebugEnabled) System.out.println("Latch cone");
     intakeMotor.set(ControlMode.PercentOutput, kLatchConeSpeed);
   }
 
   public void latchCube() {
-    if (kDebugEnabled) System.out.println("Latch Cube");
     intakeMotor.set(ControlMode.PercentOutput, kLatchCubeSpeed);
   }
 
+  public void configureCurrentLimit(boolean enabled) {
+    if (kDebugEnabled) System.out.println("Setting Current Limit Configuration: " + enabled);
+    intakeMotor.configStatorCurrentLimit(
+        new StatorCurrentLimitConfiguration(
+            enabled, kGamePieceMaxCurrent, kIntakeMaxCurrent, kTriggerThresholdTime));
+  }
+
   public void intakeCone() {
-    System.out.println("Intake cone");
     intakeMotor.set(ControlMode.PercentOutput, kIntakeConeSpeed);
   }
 
+  public void outakeCone() {
+    System.out.println("Outake cone");
+    intakeMotor.set(ControlMode.PercentOutput, kOutakeConeSpeed);
+  }
+
   public void intakeCube() {
-    System.out.println("Intake cube");
     intakeMotor.set(ControlMode.PercentOutput, kIntakeCubeSpeed);
   }
 
-  // TODO: Change to stator current and tune max current
+  public void outakeCube() {
+    System.out.println("Outake cube");
+    intakeMotor.set(ControlMode.PercentOutput, kOutakeCubeSpeed);
+  }
+
   public boolean isCurrentSpiking() {
-    return intakeMotor.getSupplyCurrent() > kIntakeMaxCurrent;
+    return intakeMotor.getStatorCurrent() > kIntakeMaxCurrent;
   }
 
   public void off() {
-    System.out.println("Intake off");
     intakeMotor.neutralOutput();
   }
 

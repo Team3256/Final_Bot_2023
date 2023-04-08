@@ -19,31 +19,40 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.Map;
 
 public final class Constants {
-  public static final boolean kDebugEnabled = true;
+  public static final boolean kDebugEnabled = false;
 
   public static final boolean kSwerveEnabled = true;
-  public static final boolean kIntakeEnabled = false;
-  public static final boolean kElevatorEnabled = false;
-  public static final boolean kArmEnabled = false;
-  public static final boolean kLedStripEnabled = false;
+  public static final boolean kClimbEnabled = true;
+  public static final boolean kIntakeEnabled = true;
+  public static final boolean kElevatorEnabled = true;
+  public static final boolean kArmEnabled = true;
+  public static final boolean kLedStripEnabled = true;
 
   public static final boolean kAdvantageKitReplayEnabled = false;
-  public static final boolean kCompetitionModeEnabled = false;
+  public static final boolean kCompetitionModeEnabled = true;
   public static final RobotType kRobotType = RobotType.ALPHA;
   public static final RobotMode kCurrentMode = RobotMode.SIM;
 
   public static final double kStickDeadband = 0.05;
+  public static final double kStickCancelDeadband = 0.50;
   public static final double kStickRotationThreshold = 0.3;
   public static final double kAzimuthStickDeadband = 0.3;
 
+  /* Swerve Logging */
   public static final Field2d trajectoryViewer = new Field2d();
   public static final Field2d waypointViewer = new Field2d();
   public static final Field2d swerveViewer = new Field2d();
 
   public static final class FeatureFlags {
+    public static final boolean kAutoScoreEnabled = false;
     public static final boolean kOperatorManualArmControlEnabled = true;
-
+    public static final boolean kArmAbsoluteEncoderEnabled = true;
+    public static final boolean kLocalizationEnabled = true;
+    public static final boolean kLocalizationStdDistanceBased = true;
     public static final boolean kSwerveAccelerationLimitingEnabled = true;
+
+    public static final boolean kUsePrefs = false;
+    public static final boolean kLocalizationUseWPIBlueOffset = false;
     public static final boolean kDynamicPathGenEnabled = false;
     public static final boolean kPitRoutineEnabled = false;
     public static final boolean kCanTestEnabled = false;
@@ -137,6 +146,7 @@ public final class Constants {
     // Dimensions for grids and nodes
     public static final class Grids {
       // X layout
+      // X layout
       public static final double kOuterX = Units.inchesToMeters(54.25);
       public static final double kLowX =
           kOuterX - (Units.inchesToMeters(14.25) / 2.0); // Centered when under cube
@@ -147,7 +157,14 @@ public final class Constants {
       // Y layout
       public static final int kNodeRowCount = 9;
       public static final double kNodeFirstY = Units.inchesToMeters(20.19);
-      public static final double kNodeSeparationY = Units.inchesToMeters(22.0);
+      public static final double kNodeSeparationY = Units.inchesToMeters(22);
+      public static final double[] kBlueNodeY = new double[9];
+
+      static {
+        for (int i = 0; i < kNodeRowCount; i++) {
+          kBlueNodeY[i] = (kNodeFirstY + kNodeSeparationY * i);
+        }
+      }
 
       // Z layout
       public static final double kCubeEdgeHigh = Units.inchesToMeters(3.0);
@@ -326,8 +343,8 @@ public final class Constants {
 
     public static class FrontConstants {
       public static final String kLimelightNetworkTablesName = "limelight-front";
-      public static final double kLimelightTranslationThresholdMeters = 1;
-      public static final double kLimelightRotationThreshold = Units.degreesToRadians(7.5);
+      public static final double kLimelightTranslationThresholdMeters = 30;
+      public static final double kLimelightRotationThreshold = Units.degreesToRadians(361);
       public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
       public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
       Matrix<N3, N1> visionMeasurementStdDevs;
@@ -335,8 +352,8 @@ public final class Constants {
 
     public static class BackConstants {
       public static final String kLimelightNetworkTablesName = "limelight-back";
-      public static final double kLimelightTranslationThresholdMeters = 1;
-      public static final double kLimelightRotationThreshold = Units.degreesToRadians(7.5);
+      public static final double kLimelightTranslationThresholdMeters = 30;
+      public static final double kLimelightRotationThreshold = Units.degreesToRadians(361);
       public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
       public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
       Matrix<N3, N1> visionMeasurementStdDevs;
@@ -344,8 +361,8 @@ public final class Constants {
 
     public static class SideConstants {
       public static final String kLimelightNetworkTablesName = "limelight-right";
-      public static final double kLimelightTranslationThresholdMeters = 1;
-      public static final double kLimelightRotationThreshold = Units.degreesToRadians(7.5);
+      public static final double kLimelightTranslationThresholdMeters = 30;
+      public static final double kLimelightRotationThreshold = Units.degreesToRadians(361);
       public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
       public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
       Matrix<N3, N1> visionMeasurementStdDevs;

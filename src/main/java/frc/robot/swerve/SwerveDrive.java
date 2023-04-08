@@ -9,10 +9,13 @@ package frc.robot.swerve;
 
 import static frc.robot.Constants.ShuffleboardConstants.*;
 import static frc.robot.Constants.VisionConstants.*;
+import static frc.robot.Constants.kDebugEnabled;
 import static frc.robot.swerve.SwerveConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.Pigeon2;
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -32,7 +35,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.FeatureFlags;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
@@ -64,12 +66,13 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
   private final Pigeon2 gyro;
 
+  private boolean isLocalized;
+
   public SwerveDrive() {
     gyro = new Pigeon2(kPigeonID, kPigeonCanBus);
     gyro.configFactoryDefault();
     zeroGyroYaw();
 
-    // TODO MAKE POSITION 0,0
     poseEstimator =
         new SwerveDrivePoseEstimator(
             kSwerveKinematics,
@@ -80,9 +83,11 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
               backLeftModule.getPosition(),
               backRightModule.getPosition()
             },
-            new Pose2d());
+            new Pose2d(),
+            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.9, 0.9, 0.02), // Current state X, Y, theta.
+            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.10, 0.10, 0.5));
 
-    if (Constants.kDebugEnabled) {
+    if (kDebugEnabled) {
       SmartDashboard.putData("Limelight Localization Field", limelightLocalizationField);
       SmartDashboard.putData("Field", field);
     }
@@ -101,7 +106,23 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     }
   }
 
+  public void stop() {
+    SwerveModuleState[] swerveModuleStates =
+        kSwerveKinematics.toSwerveModuleStates(new ChassisSpeeds());
+
+    for (SwerveModule mod : swerveModules) {
+      mod.setDesiredState(swerveModuleStates[mod.moduleNumber], true);
+    }
+    Logger.getInstance().recordOutput("SwerveModuleStates", swerveModuleStates);
+  }
+
   public void drive(ChassisSpeeds chassisSpeeds, boolean isOpenLoop) {
+    if (FeatureFlags.kSwerveAccelerationLimitingEnabled) {
+      chassisSpeeds.vxMetersPerSecond =
+          adaptiveXRateLimiter.calculate(chassisSpeeds.vxMetersPerSecond);
+      chassisSpeeds.vyMetersPerSecond =
+          adaptiveYRateLimiter.calculate(chassisSpeeds.vyMetersPerSecond);
+    }
     Pose2d robotPoseVelocity =
         new Pose2d(
             chassisSpeeds.vxMetersPerSecond * kPeriodicDeltaTime,
@@ -113,13 +134,6 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
             twistVelocity.dx / kPeriodicDeltaTime,
             twistVelocity.dy / kPeriodicDeltaTime,
             twistVelocity.dtheta / kPeriodicDeltaTime);
-
-    if (FeatureFlags.kSwerveAccelerationLimitingEnabled) {
-      chassisSpeeds.vxMetersPerSecond =
-          adaptiveXRateLimiter.calculate(chassisSpeeds.vxMetersPerSecond);
-      chassisSpeeds.vyMetersPerSecond =
-          adaptiveYRateLimiter.calculate(chassisSpeeds.vyMetersPerSecond);
-    }
 
     SwerveModuleState[] swerveModuleStates =
         kSwerveKinematics.toSwerveModuleStates(updatedChassisSpeeds);
@@ -137,7 +151,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     ChassisSpeeds swerveChassisSpeed =
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                translation.getX(), translation.getY(), rotation, getPose().getRotation())
+                translation.getX(), translation.getY(), rotation, getYaw())
             : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
     drive(swerveChassisSpeed, isOpenLoop);
@@ -176,9 +190,11 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
   public void zeroGyroYaw() {
     gyro.setYaw(0);
+    if (kDebugEnabled) System.out.println("Resetting Gyro");
   }
 
   public void setGyroYaw(double yawDegrees) {
+    if (kDebugEnabled) System.out.println("Setting gyro yaw to: " + yawDegrees);
     gyro.setYaw(yawDegrees);
   }
 
@@ -216,11 +232,24 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       double LimelightTranslationThresholdMeters,
       double LimelightRotationThreshold) {
     if (Limelight.hasValidTargets(networkTablesName)) {
-      double[] visionBotPose = Limelight.getBotpose(networkTablesName);
+      double[] visionBotPose;
+      if (FeatureFlags.kLocalizationUseWPIBlueOffset) {
+        visionBotPose = Limelight.getBotpose_wpiBlue(networkTablesName);
+      } else {
+        visionBotPose = Limelight.getBotpose(networkTablesName);
+      }
 
       if (visionBotPose.length != 0) {
-        double tx = visionBotPose[0] + fieldTransformOffsetX;
-        double ty = visionBotPose[1] + fieldTransformOffsetY;
+        double tx;
+        double ty;
+
+        if (FeatureFlags.kLocalizationUseWPIBlueOffset) {
+          tx = visionBotPose[0];
+          ty = visionBotPose[1];
+        } else {
+          tx = visionBotPose[0] + fieldTransformOffsetX;
+          ty = visionBotPose[1] + fieldTransformOffsetY;
+        }
 
         // botpose from network tables uses degrees, not radians, so need to convert
         double rx = visionBotPose[3];
@@ -228,16 +257,40 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
         double rz = ((visionBotPose[5] + 360) % 360);
 
         double tl = Limelight.getLatency_Pipeline(networkTablesName);
-
         Pose2d limelightPose = new Pose2d(new Translation2d(tx, ty), Rotation2d.fromDegrees(rz));
+
+        isLocalized =
+            shouldAddVisionMeasurement(
+                    limelightPose, LimelightTranslationThresholdMeters, LimelightRotationThreshold)
+                || isLocalized;
 
         if (shouldAddVisionMeasurement(
             limelightPose, LimelightTranslationThresholdMeters, LimelightRotationThreshold)) {
-          poseEstimator.addVisionMeasurement(
-              limelightPose, Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl));
+
+          if (FeatureFlags.kLocalizationStdDistanceBased) {
+            double[] aprilTagLocation = Limelight.getTargetPose_RobotSpace(networkTablesName);
+            double aprilTagDistance =
+                new Translation2d(aprilTagLocation[0], aprilTagLocation[1]).getNorm();
+
+            if (kDebugEnabled) {
+              SmartDashboard.putNumber("April Tag Distance", aprilTagDistance);
+            }
+
+            poseEstimator.addVisionMeasurement(
+                limelightPose,
+                Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl),
+                new MatBuilder<>(Nat.N3(), Nat.N1())
+                    .fill(
+                        aprilTagDistanceToStd(aprilTagDistance),
+                        aprilTagDistanceToStd(aprilTagDistance),
+                        0.5));
+          } else {
+            poseEstimator.addVisionMeasurement(
+                limelightPose, Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl));
+          }
         }
 
-        if (Constants.kDebugEnabled) {
+        if (kDebugEnabled) {
           limelightLocalizationField.setRobotPose(limelightPose);
           SmartDashboard.putNumber("Lime Light pose x", limelightPose.getX());
           SmartDashboard.putNumber("Lime Light pose y", limelightPose.getY());
@@ -248,23 +301,20 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     }
   }
 
+  private double aprilTagDistanceToStd(double distance) {
+    // Looked good on desmos
+    return Math.pow(distance, 2) / 3;
+  }
+
   @Override
   public void periodic() {
+    isLocalized = false;
 
     poseEstimator.update(getYaw(), getModulePositions());
     SmartDashboard.putNumber("Gyro Angle", getYaw().getDegrees());
     SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
-    if (Constants.kDebugEnabled) {
-      field.setRobotPose(poseEstimator.getEstimatedPosition());
-      Logger.getInstance().recordOutput("Odometry", getPose());
-
-      for (SwerveModule mod : swerveModules) {
-        SmartDashboard.putNumber(
-            "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-        SmartDashboard.putNumber(
-            "Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
-      }
-    }
+    field.setRobotPose(poseEstimator.getEstimatedPosition());
+    Logger.getInstance().recordOutput("Odometry", getPose());
 
     this.localize(
         FrontConstants.kLimelightNetworkTablesName,
@@ -284,6 +334,16 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
         BackConstants.kFieldTranslationOffsetY,
         BackConstants.kLimelightTranslationThresholdMeters,
         BackConstants.kLimelightTranslationThresholdMeters);
+
+    if (kDebugEnabled) {
+      for (SwerveModule mod : swerveModules) {
+        SmartDashboard.putNumber(
+            "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+        SmartDashboard.putNumber(
+            "Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
+      }
+    }
+    SmartDashboard.putBoolean("Is Localized", isLocalized);
   }
 
   public void setTrajectory(Trajectory trajectory) {
