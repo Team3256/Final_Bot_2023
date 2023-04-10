@@ -334,17 +334,13 @@ public final class Constants {
   }
 
   public static class VisionConstants {
-    // TODO: set the indexes
-    public static final int kDefaultPipeline = 0;
-
-    public static final int kDetectorPipelineIndex = 1;
-
     public static class FrontConstants {
       public static final String kLimelightNetworkTablesName = "limelight-front";
       public static final double kLimelightTranslationThresholdMeters = 30;
       public static final double kLimelightRotationThreshold = Units.degreesToRadians(361);
       public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
       public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
+      public static final int kDetectorPipelineIndex = 1;
       Matrix<N3, N1> visionMeasurementStdDevs;
     }
 

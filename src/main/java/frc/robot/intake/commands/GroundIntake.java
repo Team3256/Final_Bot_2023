@@ -24,6 +24,7 @@ public class GroundIntake extends CommandBase {
   private Elevator elevatorSubsystem;
   private Arm armSubsystem;
   private Intake intakeSubsystem;
+  private static int previousPipelineIndex;
 
   private BooleanSupplier isCurrentPieceCone;
 
@@ -41,8 +42,9 @@ public class GroundIntake extends CommandBase {
   @Override
   public void initialize() {
     if (kGamePieceDetection) {
+      this.previousPipelineIndex = (int) Limelight.getCurrentPipelineIndex(FrontConstants.kLimelightNetworkTablesName);
       Limelight.setPipelineIndex(
-          FrontConstants.kLimelightNetworkTablesName, kDetectorPipelineIndex);
+          FrontConstants.kLimelightNetworkTablesName, FrontConstants.kDetectorPipelineIndex);
       isCurrentPieceCone =
           () -> Limelight.isConeDetected(FrontConstants.kLimelightNetworkTablesName);
     }
@@ -56,6 +58,6 @@ public class GroundIntake extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    Limelight.setPipelineIndex(FrontConstants.kLimelightNetworkTablesName, kDefaultPipeline);
+    Limelight.setPipelineIndex(FrontConstants.kLimelightNetworkTablesName, previousPipelineIndex);
   }
 }
