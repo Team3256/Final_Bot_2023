@@ -42,7 +42,8 @@ public class GroundIntake extends CommandBase {
   @Override
   public void initialize() {
     if (kGamePieceDetection) {
-      this.previousPipelineIndex = (int) Limelight.getCurrentPipelineIndex(FrontConstants.kLimelightNetworkTablesName);
+      this.previousPipelineIndex =
+          (int) Limelight.getCurrentPipelineIndex(FrontConstants.kLimelightNetworkTablesName);
       Limelight.setPipelineIndex(
           FrontConstants.kLimelightNetworkTablesName, FrontConstants.kDetectorPipelineIndex);
       isCurrentPieceCone =

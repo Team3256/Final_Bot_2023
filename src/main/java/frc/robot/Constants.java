@@ -341,6 +341,15 @@ public final class Constants {
       public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
       public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
       public static final int kDetectorPipelineIndex = 1;
+
+      // how many degrees back is your limelight rotated from perfectly vertical?
+      public static final double kLimelightMountAngleDegrees = 25.0;
+
+      // distance from the center of the Limelight lens to the floor
+      public static final double kLimelightLensHeightInches = 20.0;
+
+      public static final double kMinAngleToTargetDegrees = 1.0;
+      public static final double kMinDistanceToTargetInches = 12.0;
       Matrix<N3, N1> visionMeasurementStdDevs;
     }
 
