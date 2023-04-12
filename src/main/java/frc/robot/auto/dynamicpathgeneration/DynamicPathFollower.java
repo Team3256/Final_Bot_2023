@@ -10,6 +10,7 @@ package frc.robot.auto.dynamicpathgeneration;
 import static frc.robot.Constants.trajectoryViewer;
 import static frc.robot.Constants.waypointViewer;
 import static frc.robot.auto.dynamicpathgeneration.DynamicPathConstants.*;
+import static frc.robot.led.LEDConstants.*;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
@@ -26,9 +27,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.auto.dynamicpathgeneration.helpers.PathUtil;
 import frc.robot.auto.helpers.AutoBuilder;
 import frc.robot.led.LED;
-import frc.robot.led.commands.LEDSetAllSectionsPattern;
-import frc.robot.led.patterns.Blink.ErrorPatternBlink;
-import frc.robot.led.patterns.Blink.SuccessPatternBlink;
+import frc.robot.led.commands.SetAllBlink;
 import frc.robot.swerve.SwerveDrive;
 import java.util.function.Supplier;
 
@@ -66,12 +65,11 @@ public class DynamicPathFollower {
     }
 
     if (goalType != GoalType.DOUBLE_STATION_TOP && goalType != GoalType.DOUBLE_STATION_BOTTOM) {
-      // TODO CHANGE TO -1
-      int locationId = (int) SmartDashboard.getNumber("guiColumn", 7);
+      int locationId = (int) SmartDashboard.getNumber("guiColumn", -1);
       if (locationId == -1) {
         System.out.println("locationId was invalid");
         if (ledSubsystem != null) {
-          return new LEDSetAllSectionsPattern(ledSubsystem, new ErrorPatternBlink());
+          new SetAllBlink(ledSubsystem, kError);
         } else {
           return new InstantCommand();
         }
@@ -98,7 +96,7 @@ public class DynamicPathFollower {
     // handle invalid trajectory
     if (dynamicPathGenTrajectory == null) {
       System.out.println("No trajectory was found.");
-      return new LEDSetAllSectionsPattern(ledSubsystem, new ErrorPatternBlink());
+      return new SetAllBlink(ledSubsystem, kError);
     } else {
       System.out.println("Trajectory was found.");
     }
@@ -145,8 +143,6 @@ public class DynamicPathFollower {
     }
 
     return Commands.sequence(
-        dynamicPathGenTrajectoryCommand,
-        finalTrajectory,
-        new LEDSetAllSectionsPattern(ledSubsystem, new SuccessPatternBlink()));
+        dynamicPathGenTrajectoryCommand, finalTrajectory, new SetAllBlink(ledSubsystem, kSuccess));
   }
 }
