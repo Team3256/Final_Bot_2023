@@ -66,11 +66,6 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
     rightDistanceSensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.05);
   }
 
-  private void configureSimHardware() {
-    intakeMotor = new WPI_TalonFX(kIntakeMotorID);
-    intakeMotor.setNeutralMode(NeutralMode.Brake);
-  }
-
   public double getGamePieceOffset() {
     validateSensorDistances();
     return (leftDistance - rightDistance) / 2;

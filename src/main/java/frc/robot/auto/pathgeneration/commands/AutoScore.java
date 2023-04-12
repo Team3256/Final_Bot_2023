@@ -11,6 +11,9 @@ import static frc.robot.auto.dynamicpathgeneration.DynamicPathConstants.*;
 import static frc.robot.led.LEDConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -197,6 +200,10 @@ public class AutoScore extends ParentCommand {
                 armSubsystem,
                 SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW);
     }
+
+    scoringLocation.plus(
+        new Transform2d(
+            new Translation2d(intakeSubsystem.getGamePieceOffset(), 0), new Rotation2d()));
 
     if (DriverStation.getAlliance() == Alliance.Red) {
       scoringLocation = PathUtil.flip(scoringLocation);
