@@ -21,8 +21,8 @@ import java.util.List;
 
 public final class SwerveConstants {
 
-  public static final List<TrainingDataPoint> kSwervePoseEstimatorData =
-      List.of(new TrainingDataPoint(0, 0, 0));
+  public static final List<TrainingDataPoint> kSwervePoseEstimatorStdData =
+      List.of(new TrainingDataPoint(0, 0, 0, 0));
   public static final double kSwervePoseEstimatorMinValue = 0;
   public static final double kSwervePoseEstimatorMaxValue = 0;
 

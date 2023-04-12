@@ -10,12 +10,15 @@ package frc.robot.swerve.helpers;
 public class TrainingDataPoint {
 
   public double distance;
-  public double stdDevTranslation;
+  public double stdDevXTranslation;
+  public double stdDevYTranslation;
   public double stdDevAngle;
 
-  public TrainingDataPoint(double distance, double stdDevTranslation, double stdDevAngle) {
+  public TrainingDataPoint(
+      double distance, double stdDevXTranslation, double stdDevYTranslation, double stdDevAngle) {
     this.distance = distance;
-    this.stdDevTranslation = stdDevTranslation;
+    this.stdDevXTranslation = stdDevXTranslation;
+    this.stdDevYTranslation = stdDevYTranslation;
     this.stdDevAngle = stdDevAngle;
   }
 }

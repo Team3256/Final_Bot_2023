@@ -21,10 +21,10 @@ import java.util.Map;
 public final class Constants {
   public static final boolean kDebugEnabled = true;
   public static final boolean kSwerveEnabled = true;
-  public static final boolean kClimbEnabled = true;
-  public static final boolean kIntakeEnabled = true;
-  public static final boolean kElevatorEnabled = true;
-  public static final boolean kArmEnabled = true;
+  public static final boolean kClimbEnabled = false;
+  public static final boolean kIntakeEnabled = false;
+  public static final boolean kElevatorEnabled = false;
+  public static final boolean kArmEnabled = false;
   public static final boolean kLedStripEnabled = true;
 
   public static final boolean kAdvantageKitReplayEnabled = false;
@@ -48,7 +48,8 @@ public final class Constants {
     public static final boolean kArmAbsoluteEncoderEnabled = true;
     public static final boolean kLocalizationEnabled = true;
     public static final boolean kSwerveAccelerationLimitingEnabled = true;
-    public static final boolean kLocalizationStdDistanceBased = true;
+    public static final boolean kLocalizationStdDistanceBased = false;
+    public static final boolean kLocalizationDataCollectionMode = true;
 
     public static final boolean kShuffleboardLayoutEnabled = false;
     public static final boolean kGamePieceDetection = false;

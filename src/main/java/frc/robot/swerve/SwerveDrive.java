@@ -38,11 +38,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FeatureFlags;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
+import frc.robot.helpers.StatisticsHelper;
 import frc.robot.limelight.Limelight;
 import frc.robot.logging.DoubleSendable;
 import frc.robot.logging.Loggable;
 import frc.robot.swerve.helpers.AdaptiveSlewRateLimiter;
 import frc.robot.swerve.helpers.SwerveModule;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.littletonrobotics.junction.Logger;
@@ -68,24 +71,34 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
   private final Pigeon2 gyro;
 
-  private static final PolynomialSplineFunction distanceToStdDevTranslation;
-  private static final PolynomialSplineFunction distancetostdDevAngle;
+  private static PolynomialSplineFunction distanceToStdDevXTranslation = null;
+  private static PolynomialSplineFunction distanceToStdDevYTranslation = null;
+  private static PolynomialSplineFunction distancetostdDevAngle = null;
 
   static {
-    double[] trainDistance = new double[kSwervePoseEstimatorData.size()];
-    double[] trainStdDevTranslation = new double[kSwervePoseEstimatorData.size()];
-    double[] trainStdDevAngle = new double[kSwervePoseEstimatorData.size()];
-    for (int i = 0; i < kSwervePoseEstimatorData.size(); i++) {
-      trainDistance[i] = kSwervePoseEstimatorData.get(i).distance;
-      trainStdDevTranslation[i] = kSwervePoseEstimatorData.get(i).stdDevTranslation;
-      trainStdDevAngle[i] = kSwervePoseEstimatorData.get(i).stdDevAngle;
+    if (FeatureFlags.kLocalizationStdDistanceBased) {
+      double[] trainDistance = new double[kSwervePoseEstimatorStdData.size()];
+      double[] trainStdDevXTranslation = new double[kSwervePoseEstimatorStdData.size()];
+      double[] trainStdDevYTranslation = new double[kSwervePoseEstimatorStdData.size()];
+      double[] trainStdDevAngle = new double[kSwervePoseEstimatorStdData.size()];
+      for (int i = 0; i < kSwervePoseEstimatorStdData.size(); i++) {
+        trainDistance[i] = kSwervePoseEstimatorStdData.get(i).distance;
+        trainStdDevXTranslation[i] = kSwervePoseEstimatorStdData.get(i).stdDevXTranslation;
+        trainStdDevYTranslation[i] = kSwervePoseEstimatorStdData.get(i).stdDevYTranslation;
+        trainStdDevAngle[i] = kSwervePoseEstimatorStdData.get(i).stdDevAngle;
+      }
+      distanceToStdDevXTranslation =
+          new LinearInterpolator().interpolate(trainDistance, trainStdDevXTranslation);
+      distanceToStdDevYTranslation =
+          new LinearInterpolator().interpolate(trainDistance, trainStdDevYTranslation);
+      distancetostdDevAngle = new LinearInterpolator().interpolate(trainDistance, trainStdDevAngle);
     }
-    distanceToStdDevTranslation =
-        new LinearInterpolator().interpolate(trainDistance, trainStdDevTranslation);
-    distancetostdDevAngle = new LinearInterpolator().interpolate(trainDistance, trainStdDevAngle);
   }
 
-  private boolean isLocalized;
+  private List<Double> distanceData = new ArrayList<Double>();
+  private List<Double> poseXData = new ArrayList<Double>();
+  private List<Double> poseYData = new ArrayList<Double>();
+  private List<Double> poseThetaData = new ArrayList<Double>();
 
   public SwerveDrive() {
     gyro = new Pigeon2(kPigeonID, kPigeonCanBus);
@@ -270,11 +283,17 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     if (shouldAddVisionMeasurement(
         limelightPose, LimelightTranslationThresholdMeters, LimelightRotationThreshold)) {
 
-      if (FeatureFlags.kLocalizationStdDistanceBased) {
-        double[] aprilTagLocation = Limelight.getTargetPose_RobotSpace(networkTablesName);
-        double aprilTagDistance =
-            new Translation2d(aprilTagLocation[0], aprilTagLocation[1]).getNorm();
+      double[] aprilTagLocation = Limelight.getTargetPose_RobotSpace(networkTablesName);
+      double aprilTagDistance =
+          new Translation2d(aprilTagLocation[0], aprilTagLocation[1]).getNorm();
+      if (FeatureFlags.kLocalizationDataCollectionMode) {
+        distanceData.add(aprilTagDistance);
+        poseXData.add(limelightPose.getX());
+        poseYData.add(limelightPose.getY());
+        poseThetaData.add(limelightPose.getRotation().getRadians());
+      }
 
+      if (FeatureFlags.kLocalizationStdDistanceBased) {
         if (kDebugEnabled) {
           SmartDashboard.putNumber("April Tag Distance", aprilTagDistance);
         }
@@ -284,8 +303,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
             Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl),
             new MatBuilder<>(Nat.N3(), Nat.N1())
                 .fill(
-                    getStdDevTranslation(aprilTagDistance),
-                    getStdDevTranslation(aprilTagDistance),
+                    getStdDevXTranslation(aprilTagDistance),
+                    getStdDevYTranslation(aprilTagDistance),
                     getStdDevAngle(aprilTagDistance)));
       } else {
         poseEstimator.addVisionMeasurement(
@@ -303,8 +322,6 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
   @Override
   public void periodic() {
-    isLocalized = false;
-
     poseEstimator.update(getYaw(), getModulePositions());
     SmartDashboard.putNumber("Gyro Angle", getYaw().getDegrees());
     SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
@@ -340,7 +357,16 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
             "Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
       }
     }
-    SmartDashboard.putBoolean("Is Localized", isLocalized);
+    if (FeatureFlags.kLocalizationDataCollectionMode && Timer.getFPGATimestamp() * 100 % 20 <= 2) {
+      SmartDashboard.putNumber("Distance data mean", StatisticsHelper.calculateMean(distanceData));
+      SmartDashboard.putNumber(
+          "Pose X std", StatisticsHelper.calculateStandardDeviation(poseXData));
+      SmartDashboard.putNumber(
+          "Pose Y std", StatisticsHelper.calculateStandardDeviation(poseYData));
+      SmartDashboard.putNumber(
+          "Pose theta std", StatisticsHelper.calculateStandardDeviation(poseThetaData));
+      SmartDashboard.putNumber("Std Data points", poseYData.size());
+    }
   }
 
   public void setTrajectory(Trajectory trajectory) {
@@ -389,8 +415,12 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     }
   }
 
-  public double getStdDevTranslation(double distance) {
-    return distanceToStdDevTranslation.value(clampDistanceForInterpolation(distance));
+  public double getStdDevXTranslation(double distance) {
+    return distanceToStdDevXTranslation.value(clampDistanceForInterpolation(distance));
+  }
+
+  public double getStdDevYTranslation(double distance) {
+    return distanceToStdDevYTranslation.value(clampDistanceForInterpolation(distance));
   }
 
   public double getStdDevAngle(double distance) {
