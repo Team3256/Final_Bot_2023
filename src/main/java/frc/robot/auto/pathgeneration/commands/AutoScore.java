@@ -201,9 +201,10 @@ public class AutoScore extends ParentCommand {
                 SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW);
     }
 
-    scoringLocation.plus(
-        new Transform2d(
-            new Translation2d(intakeSubsystem.getGamePieceOffset(), 0), new Rotation2d()));
+    scoringLocation =
+        scoringLocation.plus(
+            new Transform2d(
+                new Translation2d(0, intakeSubsystem.getGamePieceOffset()), new Rotation2d()));
 
     if (DriverStation.getAlliance() == Alliance.Red) {
       scoringLocation = PathUtil.flip(scoringLocation);

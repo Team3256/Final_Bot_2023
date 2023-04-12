@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
 
   public double getGamePieceOffset() {
     validateSensorDistances();
-    return (leftDistance - rightDistance) / 2;
+    return (rightDistance - leftDistance) / 2;
   }
 
   public void validateSensorDistances() {
