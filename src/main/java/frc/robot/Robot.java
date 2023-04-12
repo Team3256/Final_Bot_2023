@@ -70,6 +70,7 @@ public class Robot extends LoggedRobot {
         logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         break;
       default: // Unknown mode.
+        System.out.println("Unknown RobotMode - this should never happen! Mode: " + currentMode);
         logger.addDataReceiver(new WPILOGWriter(""));
         logger.addDataReceiver(new NT4Publisher());
         break;
