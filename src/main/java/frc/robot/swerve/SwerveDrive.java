@@ -285,7 +285,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
       double[] aprilTagLocation = Limelight.getTargetPose_RobotSpace(networkTablesName);
       double aprilTagDistance =
-          new Translation2d(aprilTagLocation[0], aprilTagLocation[1]).getNorm();
+          new Translation2d(aprilTagLocation[0], aprilTagLocation[2]).getNorm();
       if (FeatureFlags.kLocalizationDataCollectionMode) {
         distanceData.add(aprilTagDistance);
         poseXData.add(limelightPose.getX());
