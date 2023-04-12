@@ -7,21 +7,22 @@
 
 package frc.robot.intake.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import static frc.robot.led.LEDConstants.kSuccess;
+
+import frc.robot.helpers.DebugCommandBase;
 import frc.robot.helpers.TimedBoolean;
 import frc.robot.intake.Intake;
 import frc.robot.led.LED;
-import frc.robot.led.commands.LEDSetAllSectionsPattern;
-import frc.robot.led.patterns.SuccessPattern;
+import frc.robot.led.commands.SetAllColor;
 
-public class IntakeCone extends CommandBase {
+public class IntakeCone extends DebugCommandBase {
   private Intake intakeSubsystem;
   private LED ledSubsystem;
   private TimedBoolean isCurrentSpiking;
 
   public IntakeCone(Intake intakeSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
-    this.isCurrentSpiking = new TimedBoolean(intakeSubsystem::isCurrentSpiking, 1);
+    this.isCurrentSpiking = new TimedBoolean(intakeSubsystem::isCurrentSpiking, 3);
 
     addRequirements(intakeSubsystem);
   }
@@ -29,22 +30,24 @@ public class IntakeCone extends CommandBase {
   public IntakeCone(Intake intakeSubsystem, LED ledSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
     this.ledSubsystem = ledSubsystem;
+    this.isCurrentSpiking = new TimedBoolean(intakeSubsystem::isCurrentSpiking, 3);
 
     addRequirements(intakeSubsystem);
   }
 
   @Override
   public void initialize() {
-    System.out.println("Started Intake cone");
+    super.initialize();
     intakeSubsystem.intakeCone();
+    isCurrentSpiking.initialize();
   }
 
   @Override
   public void end(boolean interrupted) {
-    System.out.println("Ended Intake cone");
+    super.end(interrupted);
     intakeSubsystem.off();
     if (!interrupted && ledSubsystem != null) {
-      new LEDSetAllSectionsPattern(ledSubsystem, new SuccessPattern()).withTimeout(1).schedule();
+      new SetAllColor(ledSubsystem, kSuccess).withTimeout(1).schedule();
     }
   }
 

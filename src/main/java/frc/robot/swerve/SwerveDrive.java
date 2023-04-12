@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -107,8 +106,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
               backRightModule.getPosition()
             },
             new Pose2d(),
-            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.9, 0.9, 0.02), // Current state X, Y, theta.
-            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.10, 0.10, 0.04));
+            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.5, 0.5, 0.02), // Current state X, Y, theta.
+            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.10, 0.10, 0.5));
 
     if (kDebugEnabled) {
       SmartDashboard.putData("Limelight Localization Field", limelightLocalizationField);
@@ -243,6 +242,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       Pose2d limelightPose,
       double LimelightTranslationThresholdMeters,
       double LimelightRotationThreshold) {
+    if (limelightPose.getTranslation().getNorm() == 0) return false;
     Pose2d relativePose = limelightPose.relativeTo(poseEstimator.getEstimatedPosition());
     return Math.abs(relativePose.getTranslation().getNorm()) < LimelightTranslationThresholdMeters
         && Math.abs(relativePose.getRotation().getRadians()) < LimelightRotationThreshold;
@@ -256,6 +256,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       double LimelightRotationThreshold) {
     if (Limelight.hasValidTargets(networkTablesName)) {
       double[] visionBotPose;
+      if (!Limelight.hasValidTargets(networkTablesName)) return;
       if (FeatureFlags.kLocalizationUseWPIBlueOffset) {
         visionBotPose = Limelight.getBotpose_wpiBlue(networkTablesName);
       } else {
@@ -280,7 +281,6 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
         double rz = ((visionBotPose[5] + 360) % 360);
 
         double tl = Limelight.getLatency_Pipeline(networkTablesName);
-
         Pose2d limelightPose = new Pose2d(new Translation2d(tx, ty), Rotation2d.fromDegrees(rz));
 
         Matrix<N3, N1> visionMeasurementStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
@@ -300,17 +300,44 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
               limelightPose,
               Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl),
               visionMeasurementStdDevs);
+
+          if (FeatureFlags.kLocalizationStdDistanceBased) {
+            double[] aprilTagLocation = Limelight.getTargetPose_RobotSpace(networkTablesName);
+            double aprilTagDistance =
+                new Translation2d(aprilTagLocation[0], aprilTagLocation[1]).getNorm();
+
+            if (kDebugEnabled) {
+              SmartDashboard.putNumber("April Tag Distance", aprilTagDistance);
+            }
+
+            poseEstimator.addVisionMeasurement(
+                limelightPose,
+                Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl),
+                new MatBuilder<>(Nat.N3(), Nat.N1())
+                    .fill(
+                        aprilTagDistanceToStd(aprilTagDistance),
+                        aprilTagDistanceToStd(aprilTagDistance),
+                        0.5));
+          } else {
+            poseEstimator.addVisionMeasurement(
+                limelightPose, Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl));
+          }
         }
 
         if (kDebugEnabled) {
           limelightLocalizationField.setRobotPose(limelightPose);
-          SmartDashboard.putNumber("Lime Light pose x", limelightPose.getX());
-          SmartDashboard.putNumber("Lime Light pose y", limelightPose.getY());
+          SmartDashboard.putNumber("Lime Light pose x " + networkTablesName, limelightPose.getX());
+          SmartDashboard.putNumber("Lime Light pose y " + networkTablesName, limelightPose.getY());
           SmartDashboard.putNumber(
               "Lime Light pose theta", limelightPose.getRotation().getDegrees());
         }
       }
     }
+  }
+
+  private double aprilTagDistanceToStd(double distance) {
+    // Looked good on desmos
+    return Math.pow(distance, 2) / 3;
   }
 
   @Override
@@ -320,6 +347,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     poseEstimator.update(getYaw(), getModulePositions());
     SmartDashboard.putNumber("Gyro Angle", getYaw().getDegrees());
     SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
+    SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putNumber("Pose Y", poseEstimator.getEstimatedPosition().getY());
     field.setRobotPose(poseEstimator.getEstimatedPosition());
     Logger.getInstance().recordOutput("Odometry", getPose());
 
@@ -327,20 +356,20 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
         FrontConstants.kLimelightNetworkTablesName,
         FrontConstants.kFieldTranslationOffsetX,
         FrontConstants.kFieldTranslationOffsetY,
-        FrontConstants.kLimelightTranslationThresholdMeters,
+        FrontConstants.kLimelightTranslationThreshold,
         FrontConstants.kLimelightRotationThreshold);
     this.localize(
         SideConstants.kLimelightNetworkTablesName,
         SideConstants.kFieldTranslationOffsetX,
         SideConstants.kFieldTranslationOffsetY,
-        SideConstants.kLimelightTranslationThresholdMeters,
+        SideConstants.kLimelightTranslationThreshold,
         SideConstants.kLimelightRotationThreshold);
     this.localize(
         BackConstants.kLimelightNetworkTablesName,
         BackConstants.kFieldTranslationOffsetX,
         BackConstants.kFieldTranslationOffsetY,
-        BackConstants.kLimelightTranslationThresholdMeters,
-        BackConstants.kLimelightTranslationThresholdMeters);
+        BackConstants.kLimelightTranslationThreshold,
+        BackConstants.kLimelightTranslationThreshold);
 
     if (kDebugEnabled) {
       for (SwerveModule mod : swerveModules) {
