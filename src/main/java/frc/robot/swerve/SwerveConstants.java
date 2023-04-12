@@ -21,10 +21,18 @@ import java.util.List;
 
 public final class SwerveConstants {
 
-  public static final List<TrainingDataPoint> kSwervePoseEstimatorStdData =
-      List.of(
-          new TrainingDataPoint(0.507320, 0.657078, 0.246085, 0.155419),
-          new TrainingDataPoint(0.483991, 0.575948, 0.247456, 0.136138));
+  public static final List<TrainingDataPoint> kSwervePoseEstimatorStdData = List.of(
+      new TrainingDataPoint(0.804213, 0.629097, 0.253362, 0.157388), // impossible location
+      new TrainingDataPoint(1.093281, 0.731220, 0.261135, 0.167762), // 1 foot
+      new TrainingDataPoint(1.431827, 0.373348, 0.164643, 0.130962), // 2 foot
+      new TrainingDataPoint(1.743492, 0.539049, 0.259746, 0.158225), // 3 foot
+      new TrainingDataPoint(2.028354, 0.485496, 0.256895, 0.171350), // 4 foot
+      new TrainingDataPoint(2.336431, 0.527342, 0.261965, 0.166477), // 5 foot
+      new TrainingDataPoint(2.665142, 0.569164, 0.303846, 0.167438), // 6 foot
+      new TrainingDataPoint(2.953581, 0.593528, 0.314825, 0.159327), // 7 foot
+      new TrainingDataPoint(3.282424, 0.525938, 0.293677, 0.161348), // 8 foot
+      new TrainingDataPoint(3.560149, 0.537223, 0.421739, 0.186038)); // 9 foot
+
   public static final double kSwervePoseEstimatorMinValue = 0;
   public static final double kSwervePoseEstimatorMaxValue = 0;
 
@@ -45,8 +53,8 @@ public final class SwerveConstants {
 
   public static double kAutoEngageLimitVelocity = 1;
 
-  public static final COTSFalconSwerveConstants kChosenModule =
-      COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
+  public static final COTSFalconSwerveConstants kChosenModule = COTSFalconSwerveConstants
+      .SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
   /* Drivetrain Constants */
   public static final double kTrackWidth = Units.inchesToMeters(20.75);
@@ -59,12 +67,11 @@ public final class SwerveConstants {
    * No need to ever change this unless you are not doing a traditional
    * rectangular/square 4 module swerve
    */
-  public static final SwerveDriveKinematics kSwerveKinematics =
-      new SwerveDriveKinematics(
-          new Translation2d(kWheelBase / 2.0, kTrackWidth / 2.0),
-          new Translation2d(kWheelBase / 2.0, -kTrackWidth / 2.0),
-          new Translation2d(-kWheelBase / 2.0, kTrackWidth / 2.0),
-          new Translation2d(-kWheelBase / 2.0, -kTrackWidth / 2.0));
+  public static final SwerveDriveKinematics kSwerveKinematics = new SwerveDriveKinematics(
+      new Translation2d(kWheelBase / 2.0, kTrackWidth / 2.0),
+      new Translation2d(kWheelBase / 2.0, -kTrackWidth / 2.0),
+      new Translation2d(-kWheelBase / 2.0, kTrackWidth / 2.0),
+      new Translation2d(-kWheelBase / 2.0, -kTrackWidth / 2.0));
 
   /* Module Gear Ratios */
   public static final double kDriveGearRatio = kChosenModule.driveGearRatio;
@@ -109,9 +116,9 @@ public final class SwerveConstants {
   public static final double kDriveKF = 0.0;
 
   public static final double[] klockAngleOffsetsHorizontal = {
-    Math.PI / 4, Math.PI / 4, Math.PI / 4, Math.PI / 4
+      Math.PI / 4, Math.PI / 4, Math.PI / 4, Math.PI / 4
   }; // All modules turn left to lock
-  public static final double[] kLockAngleOffsetsX = {0, 3 * Math.PI / 2, Math.PI / 2, Math.PI};
+  public static final double[] kLockAngleOffsetsX = { 0, 3 * Math.PI / 2, Math.PI / 2, Math.PI };
 
   /*
    * Drive Motor Characterization Values
@@ -137,17 +144,17 @@ public final class SwerveConstants {
   public static final double kAzimuthI = 0.00;
   public static final double kAzimuthD = 0.01;
   public static final Rotation2d[] kAlphaOffsets = {
-    Rotation2d.fromDegrees(268.4179), // Front Left - 0
-    Rotation2d.fromDegrees(314.9192), // Front Right - 1
-    Rotation2d.fromDegrees(77.6953), // Back Left - 2
-    Rotation2d.fromDegrees(280.7226) // Back Right - 3
+      Rotation2d.fromDegrees(268.4179), // Front Left - 0
+      Rotation2d.fromDegrees(314.9192), // Front Right - 1
+      Rotation2d.fromDegrees(77.6953), // Back Left - 2
+      Rotation2d.fromDegrees(280.7226) // Back Right - 3
   };
 
   public static final Rotation2d[] kZiptideOffsets = {
-    Rotation2d.fromDegrees(531.6064455), // Front Left - 0
-    Rotation2d.fromDegrees(48.691406), // Front Right - 1
-    Rotation2d.fromDegrees(174.770508), // Back Left - 2
-    Rotation2d.fromDegrees(233.0419925) // Back Right - 3
+      Rotation2d.fromDegrees(531.6064455), // Front Left - 0
+      Rotation2d.fromDegrees(48.691406), // Front Right - 1
+      Rotation2d.fromDegrees(174.770508), // Back Left - 2
+      Rotation2d.fromDegrees(233.0419925) // Back Right - 3
   };
 
   /* Module Specific Constants */
@@ -157,8 +164,8 @@ public final class SwerveConstants {
     public static final int kCanCoderID = 2;
     public static final Rotation2d kAngleOffset = kRobotType.getOffset(0);
 
-    public static final SwerveModuleConstants constants =
-        new SwerveModuleConstants(kDriveMotorID, kAngleMotorID, kCanCoderID, kAngleOffset);
+    public static final SwerveModuleConstants constants = new SwerveModuleConstants(kDriveMotorID, kAngleMotorID,
+        kCanCoderID, kAngleOffset);
   }
 
   public static final class FrontRight {
@@ -167,8 +174,8 @@ public final class SwerveConstants {
     public static final int kCanCoderID = 5;
     public static final Rotation2d kAngleOffset = kRobotType.getOffset(1);
 
-    public static final SwerveModuleConstants constants =
-        new SwerveModuleConstants(kDriveMotorID, kAngleMotorID, kCanCoderID, kAngleOffset);
+    public static final SwerveModuleConstants constants = new SwerveModuleConstants(kDriveMotorID, kAngleMotorID,
+        kCanCoderID, kAngleOffset);
   }
 
   public static final class BackLeft {
@@ -177,8 +184,8 @@ public final class SwerveConstants {
     public static final int kCanCoderID = 8;
     public static final Rotation2d kAngleOffset = kRobotType.getOffset(2);
 
-    public static final SwerveModuleConstants constants =
-        new SwerveModuleConstants(kDriveMotorID, kAngleMotorID, kCanCoderID, kAngleOffset);
+    public static final SwerveModuleConstants constants = new SwerveModuleConstants(kDriveMotorID, kAngleMotorID,
+        kCanCoderID, kAngleOffset);
   }
 
   public static final class BackRight {
@@ -187,8 +194,8 @@ public final class SwerveConstants {
     public static final int kCanCoderID = 11;
     public static final Rotation2d angleOffset = kRobotType.getOffset(3);
 
-    public static final SwerveModuleConstants constants =
-        new SwerveModuleConstants(kDriveMotorID, kAngleMotorID, kCanCoderID, angleOffset);
+    public static final SwerveModuleConstants constants = new SwerveModuleConstants(kDriveMotorID, kAngleMotorID,
+        kCanCoderID, angleOffset);
   }
 
   public static final double kSensitivityScale = 0.3;
