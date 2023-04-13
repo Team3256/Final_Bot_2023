@@ -248,16 +248,6 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     return Rotation2d.fromDegrees(ypr[2]);
   }
 
-  public boolean shouldAddVisionMeasurement(
-      Pose2d limelightPose,
-      double LimelightTranslationThresholdMeters,
-      double LimelightRotationThreshold) {
-    if (limelightPose.getTranslation().getNorm() == 0) return false;
-    Pose2d relativePose = limelightPose.relativeTo(poseEstimator.getEstimatedPosition());
-    return Math.abs(relativePose.getTranslation().getNorm()) < LimelightTranslationThresholdMeters
-        && Math.abs(relativePose.getRotation().getRadians()) < LimelightRotationThreshold;
-  }
-
   public void localize(
       String networkTablesName,
       double fieldTransformOffsetX,
@@ -280,39 +270,34 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     double tl = Limelight.getLatency_Pipeline(networkTablesName);
     Pose2d limelightPose = new Pose2d(new Translation2d(tx, ty), Rotation2d.fromDegrees(rz));
 
-    if (shouldAddVisionMeasurement(
-        limelightPose, LimelightTranslationThresholdMeters, LimelightRotationThreshold)) {
+    double[] aprilTagLocation = Limelight.getTargetPose_RobotSpace(networkTablesName);
+    double aprilTagDistance = new Translation2d(aprilTagLocation[0], aprilTagLocation[2]).getNorm();
+    if (FeatureFlags.kLocalizationDataCollectionMode) {
+      distanceData.add(aprilTagDistance);
+      poseXData.add(limelightPose.getX());
+      poseYData.add(limelightPose.getY());
+      poseThetaData.add(limelightPose.getRotation().getRadians());
+    }
 
-      double[] aprilTagLocation = Limelight.getTargetPose_RobotSpace(networkTablesName);
-      double aprilTagDistance =
-          new Translation2d(aprilTagLocation[0], aprilTagLocation[2]).getNorm();
-      if (FeatureFlags.kLocalizationDataCollectionMode) {
-        distanceData.add(aprilTagDistance);
-        poseXData.add(limelightPose.getX());
-        poseYData.add(limelightPose.getY());
-        poseThetaData.add(limelightPose.getRotation().getRadians());
+    if (FeatureFlags.kLocalizationStdDistanceBased) {
+      if (kDebugEnabled) {
+        SmartDashboard.putNumber("April Tag Distance", aprilTagDistance);
+        SmartDashboard.putNumber("X std", getStdDevXTranslation(aprilTagDistance));
+        SmartDashboard.putNumber("Y std", getStdDevYTranslation(aprilTagDistance));
+        SmartDashboard.putNumber("Theta std", getStdDevAngle(aprilTagDistance));
       }
 
-      if (FeatureFlags.kLocalizationStdDistanceBased) {
-        if (kDebugEnabled) {
-          SmartDashboard.putNumber("April Tag Distance", aprilTagDistance);
-          SmartDashboard.putNumber("X std", getStdDevXTranslation(aprilTagDistance));
-          SmartDashboard.putNumber("Y std", getStdDevYTranslation(aprilTagDistance));
-          SmartDashboard.putNumber("Theta std", getStdDevAngle(aprilTagDistance));
-        }
-
-        poseEstimator.addVisionMeasurement(
-            limelightPose,
-            Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl),
-            new MatBuilder<>(Nat.N3(), Nat.N1())
-                .fill(
-                    getStdDevXTranslation(aprilTagDistance),
-                    getStdDevYTranslation(aprilTagDistance),
-                    getStdDevAngle(aprilTagDistance)));
-      } else {
-        poseEstimator.addVisionMeasurement(
-            limelightPose, Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl));
-      }
+      poseEstimator.addVisionMeasurement(
+          limelightPose,
+          Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl),
+          new MatBuilder<>(Nat.N3(), Nat.N1())
+              .fill(
+                  getStdDevXTranslation(aprilTagDistance),
+                  getStdDevYTranslation(aprilTagDistance),
+                  getStdDevAngle(aprilTagDistance)));
+    } else {
+      poseEstimator.addVisionMeasurement(
+          limelightPose, Timer.getFPGATimestamp() - Units.millisecondsToSeconds(tl));
     }
 
     if (kDebugEnabled) {
