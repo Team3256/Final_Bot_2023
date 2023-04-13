@@ -248,5 +248,6 @@ public class AutoScore extends ParentCommand {
             .handleInterrupt(errorLEDs::schedule);
 
     addChildCommands(autoScore);
+    super.initialize();
   }
 }
