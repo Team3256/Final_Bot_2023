@@ -296,6 +296,9 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       if (FeatureFlags.kLocalizationStdDistanceBased) {
         if (kDebugEnabled) {
           SmartDashboard.putNumber("April Tag Distance", aprilTagDistance);
+          SmartDashboard.putNumber("X std", getStdDevXTranslation(aprilTagDistance));
+          SmartDashboard.putNumber("Y std", getStdDevYTranslation(aprilTagDistance));
+          SmartDashboard.putNumber("Theta std", getStdDevAngle(aprilTagDistance));
         }
 
         poseEstimator.addVisionMeasurement(
@@ -416,11 +419,13 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   }
 
   public double getStdDevXTranslation(double distance) {
-    return distanceToStdDevXTranslation.value(clampDistanceForInterpolation(distance));
+    // TODO Remove
+    return distanceToStdDevXTranslation.value(clampDistanceForInterpolation(distance)) * 10;
   }
 
   public double getStdDevYTranslation(double distance) {
-    return distanceToStdDevYTranslation.value(clampDistanceForInterpolation(distance));
+    // TODO Remove
+    return distanceToStdDevYTranslation.value(clampDistanceForInterpolation(distance)) * 10;
   }
 
   public double getStdDevAngle(double distance) {

@@ -32,10 +32,11 @@ public final class SwerveConstants {
           new TrainingDataPoint(2.665142, 0.569164, 0.303846, 0.167438), // 6 foot
           new TrainingDataPoint(2.953581, 0.593528, 0.314825, 0.159327), // 7 foot
           new TrainingDataPoint(3.282424, 0.525938, 0.293677, 0.161348), // 8 foot
-          new TrainingDataPoint(3.560149, 0.537223, 0.421739, 0.186038)); // 9 foot
+          new TrainingDataPoint(3.560149, 0.537223, 0.421739, 0.186038),
+          new TrainingDataPoint(7.128826, 1.282671, 2.468447, 0.505372)); // 9 foot
 
-  public static final double kSwervePoseEstimatorMinValue = 0;
-  public static final double kSwervePoseEstimatorMaxValue = 0;
+  public static final double kSwervePoseEstimatorMinValue = 0.804213;
+  public static final double kSwervePoseEstimatorMaxValue = 3.560149;
 
   public static final int kPigeonID = 1;
   public static final String kPigeonCanBus = "mani";

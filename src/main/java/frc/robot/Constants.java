@@ -48,9 +48,9 @@ public final class Constants {
     public static final boolean kArmAbsoluteEncoderEnabled = true;
     public static final boolean kLocalizationEnabled = true;
     public static final boolean kSwerveAccelerationLimitingEnabled = true;
-    public static final boolean kLocalizationStdDistanceBased = false;
-    public static final boolean kLocalizationDataCollectionMode = true;
+    public static final boolean kLocalizationStdDistanceBased = true;
 
+    public static final boolean kLocalizationDataCollectionMode = true;
     public static final boolean kShuffleboardLayoutEnabled = false;
     public static final boolean kGamePieceDetection = false;
     public static final boolean kUsePrefs = false;
