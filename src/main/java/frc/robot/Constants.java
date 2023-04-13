@@ -7,13 +7,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.Map;
@@ -50,7 +47,7 @@ public final class Constants {
     public static final boolean kSwerveAccelerationLimitingEnabled = true;
     public static final boolean kLocalizationStdDistanceBased = true;
 
-    public static final boolean kLocalizationDataCollectionMode = true;
+    public static final boolean kLocalizationDataCollectionMode = false;
     public static final boolean kShuffleboardLayoutEnabled = false;
     public static final boolean kGamePieceDetection = false;
     public static final boolean kUsePrefs = false;
@@ -334,7 +331,6 @@ public final class Constants {
     }
   }
 
-  // TODO: tune distance and rotation thresholds for all limelights
   public static class VisionConstants {
     // TODO: set the indexes
     public static final int kDefaultPipeline = 0;
@@ -343,29 +339,14 @@ public final class Constants {
 
     public static class FrontConstants {
       public static final String kLimelightNetworkTablesName = "limelight-front";
-      public static final double kLimelightTranslationThreshold = 300;
-      public static final double kLimelightRotationThreshold = Units.degreesToRadians(361);
-      public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
-      public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
-      Matrix<N3, N1> visionMeasurementStdDevs;
     }
 
     public static class BackConstants {
       public static final String kLimelightNetworkTablesName = "limelight-back";
-      public static final double kLimelightTranslationThreshold = 300;
-      public static final double kLimelightRotationThreshold = Units.degreesToRadians(361);
-      public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
-      public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
-      Matrix<N3, N1> visionMeasurementStdDevs;
     }
 
     public static class SideConstants {
       public static final String kLimelightNetworkTablesName = "limelight-right";
-      public static final double kLimelightTranslationThreshold = 300;
-      public static final double kLimelightRotationThreshold = Units.degreesToRadians(361);
-      public static final double kFieldTranslationOffsetX = FieldConstants.kFieldLength / 2;
-      public static final double kFieldTranslationOffsetY = FieldConstants.kFieldWidth / 2;
-      Matrix<N3, N1> visionMeasurementStdDevs;
     }
   }
 }

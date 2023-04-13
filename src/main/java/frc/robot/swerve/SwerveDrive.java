@@ -248,21 +248,15 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     return Rotation2d.fromDegrees(ypr[2]);
   }
 
-  public void localize(
-      String networkTablesName,
-      double fieldTransformOffsetX,
-      double fieldTransformOffsetY,
-      double LimelightTranslationThresholdMeters,
-      double LimelightRotationThreshold) {
+  public void localize(String networkTablesName) {
     if (!Limelight.hasValidTargets(networkTablesName)) return;
 
     double[] visionBotPose = Limelight.getBotpose_wpiBlue(networkTablesName);
     if (visionBotPose.length == 0) return;
 
-    double tx = visionBotPose[0] + fieldTransformOffsetX;
-    double ty = visionBotPose[1] + fieldTransformOffsetY;
+    double tx = visionBotPose[0];
+    double ty = visionBotPose[1];
 
-    // botpose from network tables uses degrees, not radians, so need to convert
     double rx = visionBotPose[3];
     double ry = visionBotPose[4];
     double rz = ((visionBotPose[5] + 360) % 360);
@@ -318,24 +312,9 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     field.setRobotPose(poseEstimator.getEstimatedPosition());
     Logger.getInstance().recordOutput("Odometry", getPose());
 
-    this.localize(
-        FrontConstants.kLimelightNetworkTablesName,
-        FrontConstants.kFieldTranslationOffsetX,
-        FrontConstants.kFieldTranslationOffsetY,
-        FrontConstants.kLimelightTranslationThreshold,
-        FrontConstants.kLimelightRotationThreshold);
-    this.localize(
-        SideConstants.kLimelightNetworkTablesName,
-        SideConstants.kFieldTranslationOffsetX,
-        SideConstants.kFieldTranslationOffsetY,
-        SideConstants.kLimelightTranslationThreshold,
-        SideConstants.kLimelightRotationThreshold);
-    this.localize(
-        BackConstants.kLimelightNetworkTablesName,
-        BackConstants.kFieldTranslationOffsetX,
-        BackConstants.kFieldTranslationOffsetY,
-        BackConstants.kLimelightTranslationThreshold,
-        BackConstants.kLimelightTranslationThreshold);
+    this.localize(FrontConstants.kLimelightNetworkTablesName);
+    this.localize(SideConstants.kLimelightNetworkTablesName);
+    this.localize(BackConstants.kLimelightNetworkTablesName);
 
     if (kDebugEnabled) {
       for (SwerveModule mod : swerveModules) {
@@ -404,13 +383,11 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   }
 
   public double getStdDevXTranslation(double distance) {
-    // TODO Remove
-    return distanceToStdDevXTranslation.value(clampDistanceForInterpolation(distance)) * 10;
+    return distanceToStdDevXTranslation.value(clampDistanceForInterpolation(distance));
   }
 
   public double getStdDevYTranslation(double distance) {
-    // TODO Remove
-    return distanceToStdDevYTranslation.value(clampDistanceForInterpolation(distance)) * 10;
+    return distanceToStdDevYTranslation.value(clampDistanceForInterpolation(distance));
   }
 
   public double getStdDevAngle(double distance) {

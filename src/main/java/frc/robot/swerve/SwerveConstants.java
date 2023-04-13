@@ -23,17 +23,17 @@ public final class SwerveConstants {
 
   public static final List<TrainingDataPoint> kSwervePoseEstimatorStdData =
       List.of(
-          new TrainingDataPoint(0.804213, 0.629097, 0.253362, 0.157388), // impossible location
-          new TrainingDataPoint(1.093281, 0.731220, 0.261135, 0.167762), // 1 foot
-          new TrainingDataPoint(1.431827, 0.373348, 0.164643, 0.130962), // 2 foot
-          new TrainingDataPoint(1.743492, 0.539049, 0.259746, 0.158225), // 3 foot
-          new TrainingDataPoint(2.028354, 0.485496, 0.256895, 0.171350), // 4 foot
-          new TrainingDataPoint(2.336431, 0.527342, 0.261965, 0.166477), // 5 foot
-          new TrainingDataPoint(2.665142, 0.569164, 0.303846, 0.167438), // 6 foot
-          new TrainingDataPoint(2.953581, 0.593528, 0.314825, 0.159327), // 7 foot
-          new TrainingDataPoint(3.282424, 0.525938, 0.293677, 0.161348), // 8 foot
-          new TrainingDataPoint(3.560149, 0.537223, 0.421739, 0.186038),
-          new TrainingDataPoint(7.128826, 1.282671, 2.468447, 0.505372)); // 9 foot
+          new TrainingDataPoint(0.804213, 6.29097, 2.53362, 0.157388), // impossible location
+          new TrainingDataPoint(1.093281, 7.31220, 2.61135, 0.167762), // 1 foot
+          new TrainingDataPoint(1.431827, 3.73348, 1.64643, 0.130962), // 2 foot
+          new TrainingDataPoint(1.743492, 5.39049, 2.59746, 0.158225), // 3 foot
+          new TrainingDataPoint(2.028354, 4.85496, 2.56895, 0.171350), // 4 foot
+          new TrainingDataPoint(2.336431, 5.27342, 2.61965, 0.166477), // 5 foot
+          new TrainingDataPoint(2.665142, 5.69164, 3.03846, 0.167438), // 6 foot
+          new TrainingDataPoint(2.953581, 5.93528, 3.14825, 0.159327), // 7 foot
+          new TrainingDataPoint(3.282424, 5.25938, 2.93677, 0.161348), // 8 foot
+          new TrainingDataPoint(3.560149, 5.37223, 4.21739, 0.186038),
+          new TrainingDataPoint(7.128826, 12.82671, 24.68447, 0.505372)); // 9 foot
 
   public static final double kSwervePoseEstimatorMinValue = 0.804213;
   public static final double kSwervePoseEstimatorMaxValue = 3.560149;
