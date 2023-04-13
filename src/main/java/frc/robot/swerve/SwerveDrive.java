@@ -324,6 +324,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
             "Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
       }
     }
+
+    // * 100 % 20 <= 2 is so it doesnt run every loop
     if (FeatureFlags.kLocalizationDataCollectionMode && Timer.getFPGATimestamp() * 100 % 20 <= 2) {
       SmartDashboard.putNumber("Distance data mean", StatisticsHelper.calculateMean(distanceData));
       SmartDashboard.putNumber(
