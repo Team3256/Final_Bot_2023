@@ -83,6 +83,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     elevatorFollowerMotor =
         TalonFXFactory.createPermanentFollowerTalon(kElevatorFollowerCANDevice, kElevatorCANDevice);
     elevatorFollowerMotor.setNeutralMode(NeutralMode.Brake);
+    elevatorFollowerMotor.setInverted(true);
   }
 
   public boolean isMotorCurrentSpiking() {
