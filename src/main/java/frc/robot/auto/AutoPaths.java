@@ -106,7 +106,7 @@ public class AutoPaths {
               new SetEndEffectorState(
                       elevatorSubsystem,
                       armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
+                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_BACK)
                   .asProxy()
                   .withName("coneLow"));
 
@@ -136,7 +136,7 @@ public class AutoPaths {
               new SetEndEffectorState(
                       elevatorSubsystem,
                       armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
+                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_BACK)
                   .asProxy()
                   .withName("cubeLow"));
 
