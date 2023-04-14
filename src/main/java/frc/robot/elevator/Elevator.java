@@ -171,25 +171,33 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     Preferences.initDouble(ElevatorPreferencesKeys.kIKey, kElevatorI);
     Preferences.initDouble(ElevatorPreferencesKeys.kDKey, kElevatorD);
     // Elevator Preset Preferences
-    Preferences.initDouble(kElevatorPositionKeys.get(ElevatorPreset.STOW_CONE), kConeStowPosition);
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.STOW_CUBE), kCubeStowPosition);
+        kElevatorPositionKeys.get(ElevatorPreset.STOW_CONE),
+        Units.metersToInches(kConeStowPosition));
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.CUBE_HIGH), kCubeHighPosition);
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.STOW_CUBE),
+        Units.metersToInches(kCubeStowPosition));
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.CONE_HIGH), kConeHighPosition);
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.CUBE_HIGH),
+        Units.metersToInches(kCubeHighPosition));
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_LOW), kAnyPieceLowPosition);
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.CONE_HIGH),
+        Units.metersToInches(kConeHighPosition));
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_MID), kAnyPieceMidPosition);
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_LOW),
+        Units.metersToInches(kAnyPieceLowPosition));
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.GROUND_INTAKE), kGroundIntakePosition);
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_MID),
+        Units.metersToInches(kAnyPieceMidPosition));
+    Preferences.initDouble(
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.GROUND_INTAKE),
+        Units.metersToInches(kGroundIntakePosition));
     Preferences.initDouble(
         kElevatorPositionKeys.get(Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CUBE),
-        kCubeDoubleSubstationPosition);
+        Units.metersToInches(kCubeDoubleSubstationPosition));
     Preferences.initDouble(
         kElevatorPositionKeys.get(Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CONE),
-        kConeDoubleSubstationPosition);
+        Units.metersToInches(kConeDoubleSubstationPosition));
   }
 
   private final ElevatorSim elevatorSim =

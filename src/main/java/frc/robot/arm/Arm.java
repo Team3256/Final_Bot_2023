@@ -200,31 +200,31 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
     Preferences.initDouble(
         ArmPreferencesKeys.kAbsoluteEncoderOffsetKey, kAbsoluteEncoderOffsetRadians);
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.STOW_CONE), kStowRotationCone.getRadians());
+        kArmPositionKeys.get(ArmPreset.STOW_CONE), kStowRotationCone.getDegrees());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.STOW_CUBE), kStowRotationCube.getRadians());
+        kArmPositionKeys.get(ArmPreset.STOW_CUBE), kStowRotationCube.getDegrees());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW), kAnyPieceLowRotation.getRadians());
-    Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CUBE_MID), kCubeMidRotation.getRadians());
-    Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CONE_MID), kConeMidRotation.getRadians());
+        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW), kAnyPieceLowRotation.getDegrees());
+    Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CUBE_MID), kCubeMidRotation.getDegrees());
+    Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CONE_MID), kConeMidRotation.getDegrees());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.CUBE_HIGH), kCubeHighRotation.getRadians());
+        kArmPositionKeys.get(ArmPreset.CUBE_HIGH), kCubeHighRotation.getDegrees());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.CONE_HIGH), kConeHighRotation.getRadians());
+        kArmPositionKeys.get(ArmPreset.CONE_HIGH), kConeHighRotation.getDegrees());
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.STANDING_CONE_GROUND_INTAKE),
-        kStandingConeGroundIntakeRotation.getRadians());
+        kStandingConeGroundIntakeRotation.getDegrees());
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.TIPPED_CONE_GROUND_INTAKE),
-        kTippedConeGroundIntakeRotation.getRadians());
+        kTippedConeGroundIntakeRotation.getDegrees());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.CUBE_GROUND_INTAKE), kCubeGroundIntakeRotation.getRadians());
+        kArmPositionKeys.get(ArmPreset.CUBE_GROUND_INTAKE), kCubeGroundIntakeRotation.getDegrees());
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.DOUBLE_SUBSTATION_CONE),
-        kDoubleSubstationRotationCone.getRadians());
+        kDoubleSubstationRotationCone.getDegrees());
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.DOUBLE_SUBSTATION_CUBE),
-        kDoubleSubstationRotationCube.getRadians());
+        kDoubleSubstationRotationCube.getDegrees());
   }
 
   private final SingleJointedArmSim armSim =
