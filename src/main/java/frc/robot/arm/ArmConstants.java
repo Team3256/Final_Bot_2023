@@ -22,7 +22,7 @@ public final class ArmConstants {
   public static final double kArmRadiansPerAbsoluteEncoderRotation = -1 * Math.PI;
   public static final double kAbsoluteEncoderOffsetRadians = -5.37602984951422;
 
-  public static final double kArmGearing = 60;
+  public static final double kArmGearing = 80;
   public static final double kArmLength = 0.569075;
   public static final double kArmInertia = 0.410;
   public static final double kArmMassKg = 7.5;
@@ -101,6 +101,6 @@ public final class ArmConstants {
     public static final String kPKey = "ArmkP";
     public static final String kIKey = "ArmkI";
     public static final String kDKey = "ArmkD";
-    public static final String kAbsoluteEncoderOffsetKey = "kAbsoluteEncoderOffset";
+    public static final String kAbsoluteEncoderOffsetKey = "kAbsoluteEncoderOffsetRadians";
   }
 }

@@ -63,13 +63,13 @@ public final class ElevatorConstants {
         Map.of(
             Elevator.ElevatorPreset.STOW_CONE, "kStowPositionCone",
             Elevator.ElevatorPreset.STOW_CUBE, "kStowPositionCube",
-            Elevator.ElevatorPreset.CUBE_HIGH, "kCubeHighPositionMeters",
-            Elevator.ElevatorPreset.CONE_HIGH, "kConeHighPositionMeters",
-            Elevator.ElevatorPreset.ANY_PIECE_LOW, "kAnyPieceLowPositionMeters",
-            Elevator.ElevatorPreset.ANY_PIECE_MID, "kAnyPieceMidPositionMeters",
-            Elevator.ElevatorPreset.GROUND_INTAKE, "kGroundIntakePositionMeters",
-            Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CONE, "kDoubleSubstationPositionConeMeters",
-            Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CUBE, "kDoubleSubstationPositionCubeMeters");
+            Elevator.ElevatorPreset.CUBE_HIGH, "kCubeHighPositionInches",
+            Elevator.ElevatorPreset.CONE_HIGH, "kConeHighPositionInches",
+            Elevator.ElevatorPreset.ANY_PIECE_LOW, "kAnyPieceLowPositionInches",
+            Elevator.ElevatorPreset.ANY_PIECE_MID, "kAnyPieceMidPositionInches",
+            Elevator.ElevatorPreset.GROUND_INTAKE, "kGroundIntakePositionInches",
+            Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CONE, "kDoubleSubstationPositionConeInches",
+            Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CUBE, "kDoubleSubstationPositionCubeInches");
 
     public static final Map<Elevator.ElevatorPreset, Double> kElevatorPositionDefaults =
         Map.of(
