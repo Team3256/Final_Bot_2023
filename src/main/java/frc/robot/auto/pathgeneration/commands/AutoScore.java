@@ -8,6 +8,7 @@
 package frc.robot.auto.pathgeneration.commands;
 
 import static frc.robot.Constants.FeatureFlags.kAutoOuttakeEnabled;
+import static frc.robot.Constants.FeatureFlags.kDirectionBasedLowScoreEnabled;
 import static frc.robot.auto.dynamicpathgeneration.DynamicPathConstants.*;
 import static frc.robot.led.LEDConstants.*;
 
@@ -77,24 +78,27 @@ public class AutoScore extends ParentCommand {
     this.isAutoScoreMode = isAutoScoreMode;
     this.isCurrentLEDPieceCone = isCurrentLEDPieceCone;
     this.cancelCommand = cancelCommand;
-    this.isRedAlliance = DriverStation.getAlliance() == Alliance.Red;
   }
 
   // This checks if the robot's front side is facing the target or if the robot's backside is facing
   // the target
 
   private boolean isAlignedFront() {
+    if(!kDirectionBasedLowScoreEnabled) return false;
+
     double currentRobotAngle =
         MathUtil.angleModulus(swerveSubsystem.getPose().getRotation().getRadians());
     if (isRedAlliance) {
-      return Math.abs(currentRobotAngle) < Math.PI;
+      return Math.abs(currentRobotAngle) < Math.PI/2;
     } else {
-      return Math.abs(currentRobotAngle) > Math.PI;
+      return Math.abs(currentRobotAngle) > Math.PI/2;
     }
   }
 
   @Override
   public void initialize() {
+    this.isRedAlliance = DriverStation.getAlliance() == Alliance.Red;
+
     System.out.println(
         "Is running auto score instead of presets: " + isAutoScoreMode.getAsBoolean());
     if (!isAutoScoreMode.getAsBoolean()) {
@@ -220,16 +224,11 @@ public class AutoScore extends ParentCommand {
       default:
         scoringLocation = kBottomBlueScoringPoses[locationId];
         moveArmElevatorToPreset =
-            new ConditionalCommand(
                 new SetEndEffectorState(
-                    elevatorSubsystem,
-                    armSubsystem,
-                    SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_FRONT),
-                new SetEndEffectorState(
-                    elevatorSubsystem,
-                    armSubsystem,
-                    SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_BACK),
-                this::isAlignedFront);
+                        elevatorSubsystem,
+                        armSubsystem,
+                        SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_BACK);
+        break;
     }
 
     if (FeatureFlags.kIntakeAutoScoreDistanceSensorOffset) {
