@@ -180,10 +180,10 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
 
   public Rotation2d getArmSetpoint(Arm.ArmPreset setpoint) {
     if (Constants.FeatureFlags.kUsePrefs) {
-      return new Rotation2d(
+      return Rotation2d.fromDegrees(
           Preferences.getDouble(
               ArmPreferencesKeys.kArmPositionKeys.get(setpoint),
-              ArmPreferencesKeys.kArmPositionDefaults.get(setpoint).getRadians()));
+              ArmPreferencesKeys.kArmPositionDefaults.get(setpoint).getDegrees()));
     } else {
       return setpoint.rotation;
     }
