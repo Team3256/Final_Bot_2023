@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.arm.Arm;
-import frc.robot.arm.commands.SetArmAngle;
+import frc.robot.arm.commands.ZeroArm;
 import frc.robot.arm.commands.StowArmElevator;
 import frc.robot.auto.dynamicpathgeneration.helpers.PathUtil;
 import frc.robot.auto.pathgeneration.PathGeneration;
@@ -123,8 +123,8 @@ public class AutoIntakeAtDoubleSubstation extends CommandBase {
                     elevatorSubsystem, Elevator.ElevatorPreset.DOUBLE_SUBSTATION_CUBE),
                 isCurrentPieceCone),
             new ConditionalCommand(
-                new SetArmAngle(armSubsystem, Arm.ArmPreset.DOUBLE_SUBSTATION_CONE),
-                new SetArmAngle(armSubsystem, Arm.ArmPreset.DOUBLE_SUBSTATION_CUBE),
+                new ZeroArm(armSubsystem, Arm.ArmPreset.DOUBLE_SUBSTATION_CONE),
+                new ZeroArm(armSubsystem, Arm.ArmPreset.DOUBLE_SUBSTATION_CUBE),
                 isCurrentPieceCone));
 
     Command runIntake =

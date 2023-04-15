@@ -11,15 +11,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.arm.Arm;
 import frc.robot.arm.Arm.ArmPreset;
-import frc.robot.arm.commands.SetArmAngle;
+import frc.robot.arm.commands.ZeroArm;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.commands.ZeroElevator;
 
 public class SetArmElevatorStart extends ParallelCommandGroup {
   public SetArmElevatorStart(Elevator elevatorSubsystem, Arm armSubsystem) {
     addCommands(
-        new SetArmAngle(armSubsystem, Rotation2d.fromDegrees(180))
+        new ZeroArm(armSubsystem, Rotation2d.fromDegrees(180))
             .andThen(new ZeroElevator(elevatorSubsystem))
-            .andThen(new SetArmAngle(armSubsystem, ArmPreset.DEFAULT)));
+            .andThen(new ZeroArm(armSubsystem, ArmPreset.DEFAULT)));
   }
 }

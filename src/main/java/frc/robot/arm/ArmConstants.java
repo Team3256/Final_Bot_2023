@@ -93,4 +93,8 @@ public final class ArmConstants {
   public static final Rotation2d kGroundIntakeRotation = Rotation2d.fromDegrees(-15);
 
   public static final double kManualArmVoltage = 2;
+
+  // zero arm constants
+  public static final double armZeroVoltage = -5;
+  public static final double armMaxCurrent = 10;
 }

@@ -14,7 +14,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.UnitTestBase;
 import frc.robot.arm.Arm;
-import frc.robot.arm.commands.SetArmAngle;
+import frc.robot.arm.commands.ZeroArm;
 import org.junit.jupiter.api.BeforeAll;
 
 public class ArmTests extends UnitTestBase {
@@ -47,7 +47,7 @@ public class ArmTests extends UnitTestBase {
   // }
 
   public void testArmAngle(Rotation2d angle) {
-    Command setAngleCommand = new SetArmAngle(armSubsystem, angle);
+    Command setAngleCommand = new ZeroArm(armSubsystem, angle);
     runScheduler(3, setAngleCommand, armSubsystem);
     assertEquals(
         angle.getRadians(),

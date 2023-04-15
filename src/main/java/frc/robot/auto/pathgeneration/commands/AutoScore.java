@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.RobotContainer.GamePiece;
 import frc.robot.arm.Arm;
 import frc.robot.arm.Arm.ArmPreset;
-import frc.robot.arm.commands.SetArmAngle;
+import frc.robot.arm.commands.ZeroArm;
 import frc.robot.arm.commands.StowArmElevator;
 import frc.robot.auto.dynamicpathgeneration.DynamicPathGenerator;
 import frc.robot.auto.dynamicpathgeneration.helpers.PathUtil;
@@ -128,8 +128,8 @@ public class AutoScore extends CommandBase {
                     new SetElevatorHeight(elevatorSubsystem, ElevatorPreset.CUBE_HIGH),
                     isCurrentPieceCone),
                 new ConditionalCommand(
-                    new SetArmAngle(armSubsystem, ArmPreset.CONE_HIGH),
-                    new SetArmAngle(armSubsystem, ArmPreset.CUBE_HIGH),
+                    new ZeroArm(armSubsystem, ArmPreset.CONE_HIGH),
+                    new ZeroArm(armSubsystem, ArmPreset.CUBE_HIGH),
                     isCurrentPieceCone));
         break;
       case MID:
@@ -138,8 +138,8 @@ public class AutoScore extends CommandBase {
             new ParallelCommandGroup(
                 new SetElevatorHeight(elevatorSubsystem, ElevatorPreset.ANY_PIECE_MID),
                 new ConditionalCommand(
-                    new SetArmAngle(armSubsystem, ArmPreset.CONE_MID),
-                    new SetArmAngle(armSubsystem, ArmPreset.CUBE_MID),
+                    new ZeroArm(armSubsystem, ArmPreset.CONE_MID),
+                    new ZeroArm(armSubsystem, ArmPreset.CUBE_MID),
                     isCurrentPieceCone));
         break;
       case LOW:
@@ -148,7 +148,7 @@ public class AutoScore extends CommandBase {
         moveArmElevatorToPreset =
             new ParallelCommandGroup(
                 new SetElevatorHeight(elevatorSubsystem, ElevatorPreset.ANY_PIECE_LOW),
-                new SetArmAngle(armSubsystem, ArmPreset.ANY_PIECE_LOW));
+                new ZeroArm(armSubsystem, ArmPreset.ANY_PIECE_LOW));
     }
     if (DriverStation.getAlliance() == Alliance.Red) {
       scoringLocation = PathUtil.flip(scoringLocation);

@@ -129,8 +129,11 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
     armMotor.setVoltage(MathUtil.clamp(voltage, -12, 12));
   }
 
-  public void zeroEncoder() {
+  public void zeroMotorEncoder() {
     armMotor.setSelectedSensorPosition(0);
+  }
+  public void zeroThroughboreEncoder() {
+    armEncoder.reset();
   }
 
   /**
@@ -222,6 +225,10 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
         Preferences.getDouble(
             ArmPreferencesKeys.kArmPositionKeys.get(setpoint),
             ArmPreferencesKeys.kArmPositionDefaults.get(setpoint).getRadians()));
+  }
+
+  public double getMotorStatorCurrent() {
+    return armMotor.getStatorCurrent();
   }
 
   /** Populating arm preferences on network tables */

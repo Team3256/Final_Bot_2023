@@ -21,7 +21,7 @@ public class KeepArmAtPosition extends CommandBase {
 
   @Override
   public void initialize() {
-    new SetArmAngle(armSubsystem, new Rotation2d(armSubsystem.getArmPositionRads()))
+    new ZeroArm(armSubsystem, new Rotation2d(armSubsystem.getArmPositionRads()))
         .repeatedly()
         .schedule();
   }
