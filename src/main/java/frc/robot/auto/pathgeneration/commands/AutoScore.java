@@ -8,9 +8,11 @@
 package frc.robot.auto.pathgeneration.commands;
 
 import static frc.robot.Constants.FeatureFlags.kAutoOuttakeEnabled;
+import static frc.robot.Constants.FeatureFlags.kDirectionBasedLowScoreEnabled;
 import static frc.robot.auto.dynamicpathgeneration.DynamicPathConstants.*;
 import static frc.robot.led.LEDConstants.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -54,6 +56,7 @@ public class AutoScore extends ParentCommand {
   private BooleanSupplier cancelCommand;
   private BooleanSupplier isCurrentLEDPieceCone;
   private BooleanSupplier isAutoScoreMode;
+  private boolean isRedAlliance;
 
   public AutoScore(
       SwerveDrive swerveDrive,
@@ -77,8 +80,25 @@ public class AutoScore extends ParentCommand {
     this.cancelCommand = cancelCommand;
   }
 
+  // This checks if the robot's front side is facing the target or if the robot's backside is facing
+  // the target
+
+  private boolean isAlignedFront() {
+    if(!kDirectionBasedLowScoreEnabled) return false;
+
+    double currentRobotAngle =
+        MathUtil.angleModulus(swerveSubsystem.getPose().getRotation().getRadians());
+    if (isRedAlliance) {
+      return Math.abs(currentRobotAngle) < Math.PI/2;
+    } else {
+      return Math.abs(currentRobotAngle) > Math.PI/2;
+    }
+  }
+
   @Override
   public void initialize() {
+    this.isRedAlliance = DriverStation.getAlliance() == Alliance.Red;
+
     System.out.println(
         "Is running auto score instead of presets: " + isAutoScoreMode.getAsBoolean());
     if (!isAutoScoreMode.getAsBoolean()) {
@@ -113,10 +133,16 @@ public class AutoScore extends ParentCommand {
               .schedule();
           break;
         case LOW:
-          new SetEndEffectorState(
-                  elevatorSubsystem,
-                  armSubsystem,
-                  SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
+          new ConditionalCommand(
+                  new SetEndEffectorState(
+                      elevatorSubsystem,
+                      armSubsystem,
+                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_FRONT),
+                  new SetEndEffectorState(
+                      elevatorSubsystem,
+                      armSubsystem,
+                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_BACK),
+                  this::isAlignedFront)
               .schedule();
           break;
       }
@@ -128,7 +154,7 @@ public class AutoScore extends ParentCommand {
 
     // Get scoring location id from SD
     int locationId = (int) SmartDashboard.getNumber("guiColumn", -1);
-    if (DriverStation.getAlliance() == Alliance.Blue) {
+    if (!isRedAlliance) {
       locationId = 8 - locationId;
     }
     if (0 > locationId || locationId > 8) {
@@ -142,7 +168,7 @@ public class AutoScore extends ParentCommand {
     GamePiece scoringGamePiece = kScoringLocationPiece[locationId];
 
     System.out.println("Running: Go to grid (id: " + locationId + ") from " + start);
-    if (DriverStation.getAlliance() == Alliance.Red) {
+    if (isRedAlliance) {
       scoringWaypoint = PathUtil.flip(scoringWaypoint);
     }
     Command moveToScoringWaypoint;
@@ -198,10 +224,11 @@ public class AutoScore extends ParentCommand {
       default:
         scoringLocation = kBottomBlueScoringPoses[locationId];
         moveArmElevatorToPreset =
-            new SetEndEffectorState(
-                elevatorSubsystem,
-                armSubsystem,
-                SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW);
+                new SetEndEffectorState(
+                        elevatorSubsystem,
+                        armSubsystem,
+                        SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW_BACK);
+        break;
     }
 
     if (FeatureFlags.kIntakeAutoScoreDistanceSensorOffset) {
@@ -211,7 +238,7 @@ public class AutoScore extends ParentCommand {
                   new Translation2d(0, intakeSubsystem.getGamePieceOffset()), new Rotation2d()));
     }
 
-    if (DriverStation.getAlliance() == Alliance.Red) {
+    if (isRedAlliance) {
       scoringLocation = PathUtil.flip(scoringLocation);
     }
 

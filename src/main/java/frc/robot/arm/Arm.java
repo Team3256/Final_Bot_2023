@@ -46,7 +46,8 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
   public enum ArmPreset {
     STOW_CUBE(kStowRotationCube),
     STOW_CONE(kStowRotationCone),
-    ANY_PIECE_LOW(kAnyPieceLowRotation),
+    ANY_PIECE_LOW_BACK(kAnyPieceLowBackRotation),
+    ANY_PIECE_LOW_FRONT(kAnyPieceLowFrontRotation),
     CUBE_MID(kCubeMidRotation),
     CONE_MID(kConeMidRotation),
     CUBE_HIGH(kCubeHighRotation),
@@ -218,7 +219,10 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.STOW_CUBE), kStowRotationCube.getRadians());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW), kAnyPieceLowRotation.getRadians());
+        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW_BACK), kAnyPieceLowBackRotation.getRadians());
+    Preferences.initDouble(
+        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW_FRONT),
+        kAnyPieceLowFrontRotation.getRadians());
     Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CUBE_MID), kCubeMidRotation.getRadians());
     Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CONE_MID), kConeMidRotation.getRadians());
     Preferences.initDouble(
