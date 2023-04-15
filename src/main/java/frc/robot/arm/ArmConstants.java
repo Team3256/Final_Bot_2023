@@ -95,6 +95,7 @@ public final class ArmConstants {
   public static final double kManualArmVoltage = 2;
 
   // zero arm constants
-  public static final double armZeroVoltage = -5;
-  public static final double armMaxCurrent = 10;
+  public static final double kZeroArmVoltage = -5;
+  public static final double kZeroArmMaxStatorCurrent = 20;
 }
+

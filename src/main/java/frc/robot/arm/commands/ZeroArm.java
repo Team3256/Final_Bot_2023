@@ -35,18 +35,18 @@ public class ZeroArm extends CommandBase {
 
   @Override
   public void initialize() {
-    //run CCW
-    armSubsystem.setInputVoltage(armZeroVoltage);
+    //run CW
+    armSubsystem.setInputVoltage(kZeroArmVoltage);
   }
 
   @Override
   public void end(boolean interrupted) {
     //reset encoder
-    armSubsystem.zeroThroughboreEncoder();
+    if (!interrupted) armSubsystem.zeroThroughboreEncoder();
   }
 
   @Override
   public boolean isFinished() {
-    return armSubsystem.getMotorStatorCurrent() > armMaxCurrent;
+    return armSubsystem.getMotorStatorCurrent() > kZeroArmMaxStatorCurrent;
   }
 }
