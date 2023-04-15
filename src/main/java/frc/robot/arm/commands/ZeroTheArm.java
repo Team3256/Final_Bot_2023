@@ -21,7 +21,7 @@ import frc.robot.arm.Arm;
 import frc.robot.arm.Arm.ArmPreset;
 import frc.robot.arm.ArmConstants;
 
-public class ZeroArm extends CommandBase {
+public class ZeroTheArm extends CommandBase {
   private Arm armSubsystem;
 
   /**
@@ -29,7 +29,7 @@ public class ZeroArm extends CommandBase {
    *
    * @param armSubsystem
    */
-  public ZeroArm(Arm armSubsystem) {
+  public ZeroTheArm(Arm armSubsystem) {
     addRequirements(armSubsystem);
   }
 

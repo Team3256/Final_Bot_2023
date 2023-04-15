@@ -17,13 +17,13 @@ public class StowArmElevator extends ParallelCommandGroup {
   public StowArmElevator(Elevator elevatorSubsystem, Arm armSubsystem) {
     addCommands(
         new WaitCommand(0.17).andThen(new ZeroElevator(elevatorSubsystem)),
-        new ZeroArm(armSubsystem, Arm.ArmPreset.DEFAULT));
+        new SetArmAngle(armSubsystem, Arm.ArmPreset.DEFAULT));
   }
 
   public StowArmElevator(
       Elevator elevatorSubsystem, Arm armSubsystem, double armWaitTime, double elevatorWaitTime) {
     addCommands(
         new WaitCommand(elevatorWaitTime).andThen(new ZeroElevator(elevatorSubsystem)),
-        new WaitCommand(armWaitTime).andThen(new ZeroArm(armSubsystem, Arm.ArmPreset.DEFAULT)));
+        new WaitCommand(armWaitTime).andThen(new SetArmAngle(armSubsystem, Arm.ArmPreset.DEFAULT)));
   }
 }
