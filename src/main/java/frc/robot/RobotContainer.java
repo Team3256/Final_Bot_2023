@@ -21,17 +21,10 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FeatureFlags;
-import frc.robot.arm.Arm;
-import frc.robot.arm.ArmConstants;
-import frc.robot.arm.commands.KeepArmAtPosition;
-import frc.robot.arm.commands.SetArmVoltage;
 import frc.robot.auto.AutoConstants;
 import frc.robot.auto.AutoPaths;
 import frc.robot.auto.pathgeneration.commands.*;
 import frc.robot.auto.pathgeneration.commands.AutoIntakeAtDoubleSubstation.SubstationLocation;
-import frc.robot.climb.Climb;
-import frc.robot.climb.commands.DeployClimb;
-import frc.robot.climb.commands.RetractClimb;
 import frc.robot.drivers.CANTestable;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.commands.StowEndEffector;
@@ -73,8 +66,6 @@ public class RobotContainer implements CANTestable, Loggable {
   private SwerveDrive swerveSubsystem;
   private Intake intakeSubsystem;
   private Elevator elevatorSubsystem;
-  private Arm armSubsystem;
-  private Climb climbSubsystem;
   private LED ledSubsystem;
   private GamePiece currentPiece = GamePiece.CUBE;
   private SubstationLocation doubleSubstationLocation = SubstationLocation.RIGHT_SIDE;
@@ -87,11 +78,9 @@ public class RobotContainer implements CANTestable, Loggable {
   private final ArrayList<Loggable> loggables = new ArrayList<Loggable>();
 
   public RobotContainer() {
-    if (kArmEnabled) armSubsystem = new Arm();
     if (kIntakeEnabled) intakeSubsystem = new Intake();
     if (kElevatorEnabled) elevatorSubsystem = new Elevator();
     if (kSwerveEnabled) swerveSubsystem = new SwerveDrive();
-    if (kClimbEnabled) climbSubsystem = new Climb();
     if (kLedStripEnabled) ledSubsystem = new LED();
 
     if (kLedStripEnabled) {
@@ -102,11 +91,6 @@ public class RobotContainer implements CANTestable, Loggable {
       canBusTestables.add(intakeSubsystem);
       loggables.add(intakeSubsystem);
     }
-    if (kArmEnabled) {
-      configureArm();
-      canBusTestables.add(armSubsystem);
-      loggables.add(armSubsystem);
-    }
     if (kElevatorEnabled) {
       configureElevator();
       canBusTestables.add(elevatorSubsystem);
@@ -116,10 +100,6 @@ public class RobotContainer implements CANTestable, Loggable {
       configureSwerve();
       canBusTestables.add(swerveSubsystem);
       loggables.add(swerveSubsystem);
-    }
-    if (kClimbEnabled) {
-      configureClimb();
-      canBusTestables.add(climbSubsystem);
     }
 
     modeChooser = new SendableChooser<>();
@@ -136,11 +116,7 @@ public class RobotContainer implements CANTestable, Loggable {
 
     autoPaths =
         new AutoPaths(
-            swerveSubsystem,
-            intakeSubsystem,
-            elevatorSubsystem,
-            armSubsystem,
-            this::isCurrentPieceCone);
+            swerveSubsystem, intakeSubsystem, elevatorSubsystem, this::isCurrentPieceCone);
     autoPaths.sendCommandsToChooser();
 
     if (AutoConstants.kAutoDebug) {
@@ -154,8 +130,7 @@ public class RobotContainer implements CANTestable, Loggable {
     }
 
     if (RobotBase.isSimulation()) {
-      robotSimulation =
-          new RobotSimulation(swerveSubsystem, intakeSubsystem, armSubsystem, elevatorSubsystem);
+      robotSimulation = new RobotSimulation(swerveSubsystem, intakeSubsystem, elevatorSubsystem);
       robotSimulation.initializeRobot();
       robotSimulation.addDoubleSubstation(GamePiece.CONE);
     }
@@ -252,7 +227,6 @@ public class RobotContainer implements CANTestable, Loggable {
                   swerveSubsystem,
                   intakeSubsystem,
                   elevatorSubsystem,
-                  armSubsystem,
                   ledSubsystem,
                   () -> doubleSubstationLocation,
                   () -> isMovingJoystick(driver),
@@ -266,7 +240,6 @@ public class RobotContainer implements CANTestable, Loggable {
                   swerveSubsystem,
                   intakeSubsystem,
                   elevatorSubsystem,
-                  armSubsystem,
                   ledSubsystem,
                   AutoScore.GridScoreHeight.HIGH,
                   this::isCurrentPieceCone,
@@ -280,7 +253,6 @@ public class RobotContainer implements CANTestable, Loggable {
                   swerveSubsystem,
                   intakeSubsystem,
                   elevatorSubsystem,
-                  armSubsystem,
                   ledSubsystem,
                   AutoScore.GridScoreHeight.MID,
                   this::isCurrentPieceCone,
@@ -309,31 +281,8 @@ public class RobotContainer implements CANTestable, Loggable {
       driver
           .y()
           .or(operator.leftTrigger())
-          .onTrue(new StowEndEffector(elevatorSubsystem, armSubsystem, this::isCurrentPieceCone));
+          .onTrue(new StowEndEffector(elevatorSubsystem, this::isCurrentPieceCone));
     }
-  }
-
-  private void configureArm() {
-    armSubsystem.setDefaultCommand(new KeepArmAtPosition(armSubsystem));
-    if (kIntakeEnabled && FeatureFlags.kOperatorManualArmControlEnabled) {
-      operator.povUp().whileTrue(new SetArmVoltage(armSubsystem, ArmConstants.kManualArmVoltage));
-      operator
-          .povDown()
-          .whileTrue(new SetArmVoltage(armSubsystem, -ArmConstants.kManualArmVoltage));
-      operator
-          .povUp()
-          .or(operator.povDown())
-          .whileTrue(
-              new ConditionalCommand(
-                  new IntakeCone(intakeSubsystem),
-                  new IntakeCube(intakeSubsystem),
-                  this::isCurrentPieceCone));
-    }
-  }
-
-  public void configureClimb() {
-    operator.start().whileTrue(new DeployClimb(climbSubsystem));
-    operator.back().whileTrue(new RetractClimb(climbSubsystem));
   }
 
   public void configureLEDStrip() {
@@ -355,8 +304,7 @@ public class RobotContainer implements CANTestable, Loggable {
       return Commands.sequence(
           autoPath,
           Commands.parallel(
-              new StowEndEffector(elevatorSubsystem, armSubsystem, this::isCurrentPieceCone)
-                  .asProxy(),
+              new StowEndEffector(elevatorSubsystem, this::isCurrentPieceCone).asProxy(),
               new LockSwerveX(swerveSubsystem)
                   .andThen(() -> LED.LEDSegment.MainStrip.setColor(kLockSwerve))
                   .until(() -> isMovingJoystick(driver))));
@@ -408,7 +356,7 @@ public class RobotContainer implements CANTestable, Loggable {
 
   public void startPitRoutine() {
     PitTestRoutine pitSubsystemRoutine =
-        new PitTestRoutine(elevatorSubsystem, intakeSubsystem, swerveSubsystem, armSubsystem);
+        new PitTestRoutine(elevatorSubsystem, intakeSubsystem, swerveSubsystem);
     pitSubsystemRoutine.runPitRoutine();
   }
 

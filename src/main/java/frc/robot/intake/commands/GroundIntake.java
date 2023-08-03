@@ -11,9 +11,6 @@ import static frc.robot.Constants.FeatureFlags.*;
 import static frc.robot.Constants.VisionConstants.*;
 
 import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.arm.Arm;
-import frc.robot.arm.Arm.ArmPreset;
-import frc.robot.arm.commands.SetArmAngle;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.commands.ZeroElevator;
 import frc.robot.helpers.ParentCommand;
@@ -24,18 +21,15 @@ import java.util.function.BooleanSupplier;
 public class GroundIntake extends ParentCommand {
 
   private Elevator elevatorSubsystem;
-  private Arm armSubsystem;
   private Intake intakeSubsystem;
 
   private BooleanSupplier isCurrentPieceCone;
 
   public GroundIntake(
       Elevator elevatorSubsystem,
-      Arm armSubsystem,
       Intake intakeSubsystem,
       BooleanSupplier isCurrentPieceCone) {
     this.elevatorSubsystem = elevatorSubsystem;
-    this.armSubsystem = armSubsystem;
     this.intakeSubsystem = intakeSubsystem;
     this.isCurrentPieceCone = isCurrentPieceCone;
   }
@@ -49,14 +43,6 @@ public class GroundIntake extends ParentCommand {
           () -> Limelight.isConeDetected(FrontConstants.kLimelightNetworkTablesName);
     }
 
-    addChildCommands(
-        new ZeroElevator(elevatorSubsystem),
-        new ConditionalCommand(
-            new SetArmAngle(armSubsystem, ArmPreset.CONE_GROUND_INTAKE),
-            new SetArmAngle(armSubsystem, ArmPreset.CUBE_GROUND_INTAKE),
-            isCurrentPieceCone),
-        new ConditionalCommand(
-            new IntakeCone(intakeSubsystem), new IntakeCube(intakeSubsystem), isCurrentPieceCone));
 
     super.initialize();
   }

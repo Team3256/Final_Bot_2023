@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import static frc.robot.arm.Arm.loadArmPreferences;
 import static frc.robot.elevator.Elevator.loadElevatorPreferences;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -79,7 +78,7 @@ public class Robot extends LoggedRobot {
     logger.start(); // Start advkit logger
 
     if (FeatureFlags.kUsePrefs) {
-      loadArmPreferences();
+
       loadElevatorPreferences();
     }
     robotContainer = new RobotContainer();

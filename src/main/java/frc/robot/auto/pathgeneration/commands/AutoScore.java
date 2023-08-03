@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.FeatureFlags;
 import frc.robot.RobotContainer.GamePiece;
-import frc.robot.arm.Arm;
 import frc.robot.auto.dynamicpathgeneration.DynamicPathGenerator;
 import frc.robot.auto.dynamicpathgeneration.helpers.PathUtil;
 import frc.robot.auto.pathgeneration.PathGeneration;
@@ -47,7 +46,6 @@ public class AutoScore extends ParentCommand {
 
   private SwerveDrive swerveSubsystem;
   private Elevator elevatorSubsystem;
-  private Arm armSubsystem;
   private LED ledSubsystem;
   private Intake intakeSubsystem;
   private GridScoreHeight gridScoreHeight;
@@ -59,7 +57,6 @@ public class AutoScore extends ParentCommand {
       SwerveDrive swerveDrive,
       Intake intakeSubsystem,
       Elevator elevatorSubsystem,
-      Arm armSubsystem,
       LED ledSubsystem,
       GridScoreHeight gridScoreHeight,
       BooleanSupplier isCurrentLEDPieceCone,
@@ -69,7 +66,6 @@ public class AutoScore extends ParentCommand {
     this.swerveSubsystem = swerveDrive;
     this.intakeSubsystem = intakeSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
-    this.armSubsystem = armSubsystem;
     this.ledSubsystem = ledSubsystem;
     this.gridScoreHeight = gridScoreHeight;
     this.isAutoScoreMode = isAutoScoreMode;
@@ -87,13 +83,9 @@ public class AutoScore extends ParentCommand {
           Commands.parallel(
                   new ConditionalCommand(
                       new SetEndEffectorState(
-                          elevatorSubsystem,
-                          armSubsystem,
-                          SetEndEffectorState.EndEffectorPreset.SCORE_CONE_HIGH),
+                          elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CONE_HIGH),
                       new SetEndEffectorState(
-                          elevatorSubsystem,
-                          armSubsystem,
-                          SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_HIGH),
+                          elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_HIGH),
                       isCurrentLEDPieceCone))
               .schedule();
           break;
@@ -102,21 +94,15 @@ public class AutoScore extends ParentCommand {
           Commands.parallel(
                   new ConditionalCommand(
                       new SetEndEffectorState(
-                          elevatorSubsystem,
-                          armSubsystem,
-                          SetEndEffectorState.EndEffectorPreset.SCORE_CONE_MID),
+                          elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CONE_MID),
                       new SetEndEffectorState(
-                          elevatorSubsystem,
-                          armSubsystem,
-                          SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_MID),
+                          elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_MID),
                       isCurrentLEDPieceCone))
               .schedule();
           break;
         case LOW:
           new SetEndEffectorState(
-                  elevatorSubsystem,
-                  armSubsystem,
-                  SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
+                  elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
               .schedule();
           break;
       }
@@ -171,13 +157,9 @@ public class AutoScore extends ParentCommand {
         moveArmElevatorToPreset =
             new ConditionalCommand(
                 new SetEndEffectorState(
-                    elevatorSubsystem,
-                    armSubsystem,
-                    SetEndEffectorState.EndEffectorPreset.SCORE_CONE_HIGH),
+                    elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CONE_HIGH),
                 new SetEndEffectorState(
-                    elevatorSubsystem,
-                    armSubsystem,
-                    SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_HIGH),
+                    elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_HIGH),
                 isCurrentPieceCone);
         break;
       case MID:
@@ -185,13 +167,9 @@ public class AutoScore extends ParentCommand {
         moveArmElevatorToPreset =
             new ConditionalCommand(
                 new SetEndEffectorState(
-                    elevatorSubsystem,
-                    armSubsystem,
-                    SetEndEffectorState.EndEffectorPreset.SCORE_CONE_MID),
+                    elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CONE_MID),
                 new SetEndEffectorState(
-                    elevatorSubsystem,
-                    armSubsystem,
-                    SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_MID),
+                    elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_MID),
                 isCurrentPieceCone);
         break;
       case LOW:
@@ -199,9 +177,7 @@ public class AutoScore extends ParentCommand {
         scoringLocation = kBottomBlueScoringPoses[locationId];
         moveArmElevatorToPreset =
             new SetEndEffectorState(
-                elevatorSubsystem,
-                armSubsystem,
-                SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW);
+                elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW);
     }
 
     if (FeatureFlags.kIntakeAutoScoreDistanceSensorOffset) {
@@ -228,8 +204,7 @@ public class AutoScore extends ParentCommand {
             new SetAllColor(ledSubsystem, kCube),
             isCurrentPieceCone);
 
-    Command stowArmElevator =
-        new StowEndEffector(elevatorSubsystem, armSubsystem, isCurrentPieceCone);
+    Command stowArmElevator = new StowEndEffector(elevatorSubsystem, isCurrentPieceCone);
 
     Command autoScore =
         Commands.sequence(

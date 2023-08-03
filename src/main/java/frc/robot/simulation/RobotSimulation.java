@@ -9,7 +9,6 @@ package frc.robot.simulation;
 
 import static frc.robot.Constants.*;
 import static frc.robot.elevator.ElevatorConstants.kElevatorAngleOffset;
-import static frc.robot.intake.IntakeConstants.kIntakeWristRatio;
 import static frc.robot.simulation.SimulationConstants.*;
 
 import edu.wpi.first.math.util.Units;
@@ -20,7 +19,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.RobotContainer.GamePiece;
-import frc.robot.arm.Arm;
 import frc.robot.elevator.Elevator;
 import frc.robot.intake.Intake;
 import frc.robot.swerve.SwerveDrive;
@@ -28,18 +26,13 @@ import frc.robot.swerve.SwerveDrive;
 public class RobotSimulation {
   private SwerveDrive swerveSubsystem;
   private Intake intakeSubsystem;
-  private Arm armSubsystem;
   private Elevator elevatorSubsystem;
   private Mechanism2d robotCanvas;
 
   public RobotSimulation(
-      SwerveDrive swerveSubsystem,
-      Intake intakeSubsystem,
-      Arm armSubsystem,
-      Elevator elevatorSubsystem) {
+      SwerveDrive swerveSubsystem, Intake intakeSubsystem, Elevator elevatorSubsystem) {
     this.swerveSubsystem = swerveSubsystem;
     this.intakeSubsystem = intakeSubsystem;
-    this.armSubsystem = armSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
   }
 
@@ -82,45 +75,20 @@ public class RobotSimulation {
                   new Color8Bit(Color.kRed)));
       elevatorSubsystem.getLigament().append(armPivot);
     }
-
-    if (kArmEnabled) {
-      MechanismLigament2d intakePivot = intakeSubsystem.getWrist();
-
-      armPivot.append(armSubsystem.getLigament());
-      armSubsystem.getLigament().append(intakePivot);
-
-      if (kIntakeEnabled) {
-        intakePivot
-            .append(
-                new MechanismLigament2d(
-                    "Intake 1",
-                    Units.inchesToMeters(3),
-                    -3.728 + 90,
-                    kIntakeLineWidth,
-                    new Color8Bit(Color.kYellow)))
-            .append(
-                new MechanismLigament2d(
-                    "Intake 2",
-                    Units.inchesToMeters(6.813),
-                    128.732,
-                    kIntakeLineWidth,
-                    new Color8Bit(Color.kYellow)))
-            .append(
-                new MechanismLigament2d(
-                    "Intake 3",
-                    Units.inchesToMeters(11.738),
-                    92.834,
-                    kIntakeLineWidth,
-                    new Color8Bit(Color.kYellow)))
-            .append(
-                new MechanismLigament2d(
-                    "Intake 4",
-                    Units.inchesToMeters(10.5),
-                    152.3,
-                    kIntakeLineWidth,
-                    new Color8Bit(Color.kYellow)));
-      }
-    }
+    /**
+     * if (kArmEnabled) { MechanismLigament2d intakePivot = intakeSubsystem.getWrist();
+     *
+     * <p>armPivot.append(armSubsystem.getLigament());
+     * armSubsystem.getLigament().append(intakePivot);
+     *
+     * <p>if (kIntakeEnabled) { intakePivot .append( new MechanismLigament2d( "Intake 1",
+     * Units.inchesToMeters(3), -3.728 + 90, kIntakeLineWidth, new Color8Bit(Color.kYellow)))
+     * .append( new MechanismLigament2d( "Intake 2", Units.inchesToMeters(6.813), 128.732,
+     * kIntakeLineWidth, new Color8Bit(Color.kYellow))) .append( new MechanismLigament2d( "Intake
+     * 3", Units.inchesToMeters(11.738), 92.834, kIntakeLineWidth, new Color8Bit(Color.kYellow)))
+     * .append( new MechanismLigament2d( "Intake 4", Units.inchesToMeters(10.5), 152.3,
+     * kIntakeLineWidth, new Color8Bit(Color.kYellow))); } }
+     */
   }
 
   public void updateSubsystemPositions() {
@@ -130,19 +98,11 @@ public class RobotSimulation {
           .setLength(
               Units.inchesToMeters(kArmStartPosition) + elevatorSubsystem.getElevatorPosition());
     }
-    if (kArmEnabled) {
-      armSubsystem
-          .getLigament()
-          .setAngle(Units.radiansToDegrees(armSubsystem.getArmPositionElevatorRelative()) - 90);
-    }
-    if (kIntakeEnabled) {
-      intakeSubsystem
-          .getWrist()
-          .setAngle(
-              Units.radiansToDegrees(armSubsystem.getArmPositionGroundRelative())
-                      * kIntakeWristRatio
-                  - 90);
-    }
+    /**
+     * if (kIntakeEnabled) { intakeSubsystem .getWrist() .setAngle(
+     * Units.radiansToDegrees(armSubsystem.getArmPositionGroundRelative()) kIntakeWristRatio - 90);
+     * }
+     */
   }
 
   public void addDoubleSubstation(GamePiece gamePiece) {
