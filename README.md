@@ -1,5 +1,5 @@
 # Final Bot 2023
-### Check out our docs folder for documentation
+### Check out the folder named "docs" for documentation
 
 Helpful Links:
 * Workflow: https://docs.google.com/document/d/1dZiFLn_9Vd62xkpVg2fgy4h0h0F04nwnSNDunNWpVjg/edit#
@@ -8,5 +8,5 @@ Helpful Links:
 * Design Doc Template: https://docs.google.com/document/d/11orxUvkOlzXTRKdqYNKtI4NagY8mv5LwN7cbTrmco5g/edit
 
 FAQ:
-Q: What is the CODEOWNERS file?
-A: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+* Q: What is the CODEOWNERS file?
+* A: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
