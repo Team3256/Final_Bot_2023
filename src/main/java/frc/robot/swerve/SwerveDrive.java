@@ -18,10 +18,7 @@ import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -37,6 +34,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FeatureFlags;
+import frc.robot.Robot;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
 import frc.robot.helpers.StatisticsHelper;
@@ -57,6 +55,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   private final SwerveModule backLeftModule = new SwerveModule(2, BackLeft.constants);
   private final SwerveModule backRightModule = new SwerveModule(3, BackRight.constants);
   private final SwerveDrivePoseEstimator poseEstimator;
+  Twist2d swerveSimTwist = new Twist2d();
+  Pose2d swerveSimPose = new Pose2d();
 
   private final Field2d field = new Field2d();
   private final Field2d limelightLocalizationField = new Field2d();
@@ -139,17 +139,10 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     }
   }
 
-  public void stop() {
-    SwerveModuleState[] swerveModuleStates =
-        kSwerveKinematics.toSwerveModuleStates(new ChassisSpeeds());
-
-    for (SwerveModule mod : swerveModules) {
-      mod.setDesiredState(swerveModuleStates[mod.moduleNumber], true);
-    }
-    Logger.getInstance().recordOutput("SwerveModuleStates", swerveModuleStates);
-  }
-
   public void drive(ChassisSpeeds chassisSpeeds, boolean isOpenLoop) {
+    swerveSimTwist.dx = chassisSpeeds.vxMetersPerSecond;
+    swerveSimTwist.dy = chassisSpeeds.vyMetersPerSecond;
+    swerveSimTwist.dtheta = chassisSpeeds.omegaRadiansPerSecond;
     if (FeatureFlags.kSwerveAccelerationLimitingEnabled) {
       chassisSpeeds.vxMetersPerSecond =
           adaptiveXRateLimiter.calculate(chassisSpeeds.vxMetersPerSecond);
@@ -190,6 +183,16 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     drive(swerveChassisSpeed, isOpenLoop);
   }
 
+  public void stop() {
+    SwerveModuleState[] swerveModuleStates =
+        kSwerveKinematics.toSwerveModuleStates(new ChassisSpeeds());
+
+    for (SwerveModule mod : swerveModules) {
+      mod.setDesiredState(swerveModuleStates[mod.moduleNumber], true);
+    }
+    Logger.getInstance().recordOutput("SwerveModuleStates", swerveModuleStates);
+  }
+
   public void setDesiredAngleState(SwerveModuleState[] swerveModuleStates) {
     for (SwerveModule mod : swerveModules) {
       mod.setDesiredAngleState(swerveModuleStates[mod.moduleNumber]);
@@ -206,7 +209,8 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   }
 
   public Pose2d getPose() {
-    return poseEstimator.getEstimatedPosition();
+    if (Robot.isSimulation()) return swerveSimPose;
+    else return poseEstimator.getEstimatedPosition();
   }
 
   public void resetOdometry(Pose2d pose) {
@@ -223,34 +227,6 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       states[mod.moduleNumber] = mod.getPosition();
     }
     return states;
-  }
-
-  public void zeroGyroYaw() {
-    gyro.setYaw(0);
-    if (kDebugEnabled) System.out.println("Resetting Gyro");
-  }
-
-  public void setGyroYaw(double yawDegrees) {
-    if (kDebugEnabled) System.out.println("Setting gyro yaw to: " + yawDegrees);
-    gyro.setYaw(yawDegrees);
-  }
-
-  public Rotation2d getYaw() {
-    double[] ypr = new double[3];
-    gyro.getYawPitchRoll(ypr);
-    return (kInvertGyroYaw) ? Rotation2d.fromDegrees(360 - ypr[0]) : Rotation2d.fromDegrees(ypr[0]);
-  }
-
-  public Rotation2d getPitch() {
-    double[] ypr = new double[3];
-    gyro.getYawPitchRoll(ypr);
-    return Rotation2d.fromDegrees(ypr[1]);
-  }
-
-  public Rotation2d getRoll() {
-    double[] ypr = new double[3];
-    gyro.getYawPitchRoll(ypr);
-    return Rotation2d.fromDegrees(ypr[2]);
   }
 
   public void localize(String networkTablesName) {
@@ -324,9 +300,10 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
     poseEstimator.update(getYaw(), getModulePositions());
     SmartDashboard.putNumber("Gyro Angle", getYaw().getDegrees());
     SmartDashboard.putNumber("Gyro Pitch", getPitch().getDegrees());
-    SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
-    SmartDashboard.putNumber("Pose Y", poseEstimator.getEstimatedPosition().getY());
-    field.setRobotPose(poseEstimator.getEstimatedPosition());
+    SmartDashboard.putNumber("Pose X", getPose().getX());
+    SmartDashboard.putNumber("Pose Y", getPose().getY());
+
+    field.setRobotPose(getPose());
     Logger.getInstance().recordOutput("Odometry", getPose());
 
     if (!DriverStation.isAutonomous() || FeatureFlags.kLocalizeDuringAuto) {
@@ -356,7 +333,17 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
       SmartDashboard.putNumber("Std Data points", poseYData.size());
     }
   }
-
+  // --SIM
+  @Override
+  public void simulationPeriodic() {
+    swerveSimPose =
+        swerveSimPose.transformBy(
+            new Transform2d(
+                new Translation2d(
+                    swerveSimTwist.dx * kPeriodicDeltaTime, swerveSimTwist.dy * kPeriodicDeltaTime),
+                new Rotation2d(swerveSimTwist.dtheta * kPeriodicDeltaTime)));
+  }
+  // --LOGGING
   public void setTrajectory(Trajectory trajectory) {
     field.getObject("traj").setTrajectory(trajectory);
   }
@@ -364,7 +351,7 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
   @Override
   public void logInit() {
     getLayout(kDriverTabName).add(this);
-    getLayout(kDriverTabName).add("gyro", new DoubleSendable(gyro::getYaw, "Gyro"));
+    getLayout(kDriverTabName).add("gyro", new DoubleSendable(this::getYawDeg, "Gyro"));
     for (int i = 0; i < swerveModules.length; i++) {
       getLayout(kDriverTabName).add("Encoder " + i, swerveModules[i].getAngleEncoder());
     }
@@ -417,6 +404,45 @@ public class SwerveDrive extends SubsystemBase implements Loggable, CANTestable 
 
   public double clampDistanceForInterpolation(double distance) {
     return MathUtil.clamp(distance, kSwervePoseEstimatorMinValue, kSwervePoseEstimatorMaxValue);
+  }
+
+  // --GYRO
+  public void zeroGyroYaw() {
+    gyro.setYaw(0);
+    if (kDebugEnabled) System.out.println("Resetting Gyro");
+  }
+
+  public void setGyroYaw(double yawDegrees) {
+    if (kDebugEnabled) System.out.println("Setting gyro yaw to: " + yawDegrees);
+    gyro.setYaw(yawDegrees);
+  }
+
+  public Rotation2d getYaw() {
+    if (Robot.isSimulation()) {
+      return swerveSimPose.getRotation();
+    } else {
+      double[] ypr = new double[3];
+      gyro.getYawPitchRoll(ypr);
+      return (kInvertGyroYaw)
+          ? Rotation2d.fromDegrees(360 - ypr[0])
+          : Rotation2d.fromDegrees(ypr[0]);
+    }
+  }
+
+  public double getYawDeg() {
+    return getYaw().getDegrees();
+  }
+
+  public Rotation2d getPitch() {
+    double[] ypr = new double[3];
+    gyro.getYawPitchRoll(ypr);
+    return Rotation2d.fromDegrees(ypr[1]);
+  }
+
+  public Rotation2d getRoll() {
+    double[] ypr = new double[3];
+    gyro.getYawPitchRoll(ypr);
+    return Rotation2d.fromDegrees(ypr[2]);
   }
 
   public boolean isTiltedForward() {
