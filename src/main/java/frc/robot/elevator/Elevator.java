@@ -13,12 +13,15 @@ import static frc.robot.elevator.ElevatorConstants.ElevatorPreferencesKeys.*;
 import static frc.robot.simulation.SimulationConstants.*;
 import static frc.robot.swerve.helpers.Conversions.falconToMeters;
 
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -36,6 +39,7 @@ import frc.robot.Constants.FeatureFlags;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
 import frc.robot.drivers.TalonFXFactory;
+import frc.robot.elevator.commands.SetElevatorExtension;
 import frc.robot.elevator.commands.ZeroElevator;
 import frc.robot.logging.DoubleSendable;
 import frc.robot.logging.Loggable;
@@ -47,7 +51,8 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     CUBE_HIGH(kCubeHighPosition),
     CONE_HIGH(kConeHighPosition),
     ANY_PIECE_MID(kAnyPieceMidPosition),
-    ANY_PIECE_LOW(kAnyPieceLowPosition),
+    ANY_PIECE_LOW_BACK(kAnyPieceLowBackPosition),
+    ANY_PIECE_LOW_FRONT(kAnyPieceLowFrontPosition),
     GROUND_INTAKE(kGroundIntakePosition),
     DOUBLE_SUBSTATION_CONE(kConeDoubleSubstationPosition),
     DOUBLE_SUBSTATION_CUBE(kCubeDoubleSubstationPosition);
@@ -61,8 +66,9 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
 
   private WPI_TalonFX elevatorMotor;
   private WPI_TalonFX elevatorFollowerMotor;
-  private ElevatorFeedforward elevatorFeedforward =
+  private final ElevatorFeedforward elevatorFeedforward =
       new ElevatorFeedforward(kElevatorS, kElevatorG, kElevatorV, kElevatorA);
+  private DigitalInput zeroLimitSwitch;
 
   public Elevator() {
     if (RobotBase.isReal()) {
@@ -78,11 +84,20 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
   private void configureRealHardware() {
     elevatorMotor = TalonFXFactory.createDefaultTalon(kElevatorCANDevice);
     elevatorMotor.setInverted(true);
-    elevatorMotor.setNeutralMode(NeutralMode.Brake);
+    if (FeatureFlags.kCalibrationMode) {
+      elevatorMotor.setNeutralMode(NeutralMode.Coast);
+    } else {
+      elevatorMotor.setNeutralMode(NeutralMode.Brake);
+    }
+
+    elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 20, 20, 0.2));
 
     elevatorFollowerMotor =
         TalonFXFactory.createPermanentFollowerTalon(kElevatorFollowerCANDevice, kElevatorCANDevice);
+    elevatorFollowerMotor.setInverted(InvertType.FollowMaster);
     elevatorFollowerMotor.setNeutralMode(NeutralMode.Brake);
+    zeroElevator();
+    zeroLimitSwitch = new DigitalInput(kElevatorLimitSwitchDIO);
   }
 
   public boolean isMotorCurrentSpiking() {
@@ -91,6 +106,10 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     } else {
       return elevatorSim.getCurrentDrawAmps() >= kElevatorCurrentThreshold;
     }
+  }
+
+  public boolean isZeroLimitSwitchTriggered() {
+    return !zeroLimitSwitch.get();
   }
 
   public double calculateFeedForward(double velocity) {
@@ -122,11 +141,16 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     System.out.println("Elevator off");
   }
 
+  public boolean isSafeFromArm() {
+    return getElevatorPosition() > kSafeForArmMinPosition;
+  }
+
   @Override
   public void periodic() {
     SmartDashboard.putNumber(
         "Elevator position inches", Units.metersToInches(getElevatorPosition()));
     SmartDashboard.putNumber("Elevator Current Draw", elevatorMotor.getSupplyCurrent());
+    SmartDashboard.putBoolean("Elevator limit switch (closed is false)", zeroLimitSwitch.get());
   }
 
   public void logInit() {
@@ -134,6 +158,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     getLayout(kDriverTabName).add(new ZeroElevator(this));
     getLayout(kDriverTabName).add("Position", new DoubleSendable(this::getElevatorPosition));
     getLayout(kDriverTabName).add(elevatorMotor);
+    getLayout(kDriverTabName).add(new SetElevatorExtension(this, 0));
   }
 
   @Override
@@ -177,7 +202,11 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     Preferences.initDouble(
         kElevatorPositionKeys.get(Elevator.ElevatorPreset.CONE_HIGH), kConeHighPosition);
     Preferences.initDouble(
-        kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_LOW), kAnyPieceLowPosition);
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_LOW_BACK),
+        kAnyPieceLowBackPosition);
+    Preferences.initDouble(
+        kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_LOW_FRONT),
+        kAnyPieceLowFrontPosition);
     Preferences.initDouble(
         kElevatorPositionKeys.get(Elevator.ElevatorPreset.ANY_PIECE_MID), kAnyPieceMidPosition);
     Preferences.initDouble(
@@ -205,6 +234,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     elevatorMotor = new WPI_TalonFX(kElevatorMasterID);
     elevatorMotor.setInverted(true);
     elevatorMotor.setNeutralMode(NeutralMode.Brake);
+    zeroLimitSwitch = new DigitalInput(kElevatorLimitSwitchDIO);
 
     elevatorLigament =
         new MechanismLigament2d(

@@ -16,6 +16,7 @@ import static frc.robot.simulation.SimulationConstants.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.playingwithfusion.TimeOfFlight;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -30,6 +31,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.FeatureFlags;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
 import frc.robot.drivers.TalonFXFactory;
@@ -58,22 +61,40 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
   private void configureRealHardware() {
     intakeMotor = TalonFXFactory.createDefaultTalon(kIntakeCANDevice);
     intakeMotor.setNeutralMode(NeutralMode.Brake);
+    configIntakeCurrentLimit();
 
-    leftDistanceSensor = new TimeOfFlight(kLeftDistanceSensorID);
-    rightDistanceSensor = new TimeOfFlight(kRightDistanceSensorID);
+    if (FeatureFlags.kIntakeAutoScoreDistanceSensorOffset) {
+      leftDistanceSensor = new TimeOfFlight(kLeftDistanceSensorID);
+      rightDistanceSensor = new TimeOfFlight(kRightDistanceSensorID);
 
-    leftDistanceSensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.05);
-    rightDistanceSensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.05);
+      leftDistanceSensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.05);
+      rightDistanceSensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.05);
+
+      if (Constants.kDebugEnabled) {
+        SmartDashboard.putData("Intake motor", intakeMotor);
+        SmartDashboard.putData("Left distance sensor", leftDistanceSensor);
+        SmartDashboard.putData("Right distance sensor", rightDistanceSensor);
+      }
+    }
+  }
+
+  public void configIntakeCurrentLimit() {
+    intakeMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 60, 60, 0.2));
   }
 
   public double getGamePieceOffset() {
-    validateSensorDistances();
-    return (rightDistance - leftDistance) / 2;
+    if (FeatureFlags.kIntakeAutoScoreDistanceSensorOffset) {
+      updateSensorDistances();
+      return (rightDistance - leftDistance) / 2;
+    }
+    return 0;
   }
 
-  public void validateSensorDistances() {
-    if (leftDistanceSensor.isRangeValid()) leftDistance = leftDistanceSensor.getRange() / 1000;
-    if (rightDistanceSensor.isRangeValid()) rightDistance = leftDistanceSensor.getRange() / 1000;
+  public void updateSensorDistances() {
+    double leftMeasurement = leftDistanceSensor.getRange() / 1000;
+    double rightMeasurement = rightDistanceSensor.getRange() / 1000;
+    if (leftDistanceSensor.isRangeValid()) leftDistance = leftMeasurement;
+    if (rightDistanceSensor.isRangeValid()) rightDistance = rightMeasurement;
   }
 
   public double getIntakeSpeed() {
@@ -88,7 +109,7 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
     intakeMotor.set(ControlMode.PercentOutput, kLatchCubeSpeed);
   }
 
-  public void configureCurrentLimit(boolean enabled) {
+  public void configureLatchCurrentLimit(boolean enabled) {
     if (kDebugEnabled) System.out.println("Setting Current Limit Configuration: " + enabled);
     intakeMotor.configStatorCurrentLimit(
         new StatorCurrentLimitConfiguration(
@@ -114,7 +135,7 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
   }
 
   public boolean isCurrentSpiking() {
-    return intakeMotor.getStatorCurrent() > kIntakeMaxCurrent;
+    return intakeMotor.getSupplyCurrent() > kIntakeMaxCurrent;
   }
 
   public void off() {
@@ -123,8 +144,11 @@ public class Intake extends SubsystemBase implements Loggable, CANTestable {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Intake supply current", intakeMotor.getSupplyCurrent());
-    SmartDashboard.putNumber("Intake stator current", intakeMotor.getStatorCurrent());
+    if (Constants.kDebugEnabled) {
+      SmartDashboard.putNumber("Intake supply current", intakeMotor.getSupplyCurrent());
+      SmartDashboard.putNumber("Intake stator current", intakeMotor.getStatorCurrent());
+      SmartDashboard.putNumber("Intake game piece offset from center", getGamePieceOffset());
+    }
   }
 
   public void logInit() {

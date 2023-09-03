@@ -7,6 +7,7 @@
 
 package frc.robot.arm;
 
+import static frc.robot.Constants.FeatureFlags.kUsePrefs;
 import static frc.robot.Constants.ShuffleboardConstants.*;
 import static frc.robot.arm.ArmConstants.*;
 import static frc.robot.arm.ArmConstants.ArmPreferencesKeys.*;
@@ -14,6 +15,7 @@ import static frc.robot.elevator.ElevatorConstants.kElevatorAngleOffset;
 import static frc.robot.simulation.SimulationConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -33,22 +35,29 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.FeatureFlags;
+import frc.robot.arm.commands.SetArmAngle;
+import frc.robot.arm.commands.ZeroArm;
 import frc.robot.drivers.CANDeviceTester;
 import frc.robot.drivers.CANTestable;
 import frc.robot.drivers.TalonFXFactory;
+import frc.robot.elevator.ElevatorConstants;
 import frc.robot.logging.DoubleSendable;
 import frc.robot.logging.Loggable;
+import frc.robot.swerve.helpers.Conversions;
 
 public class Arm extends SubsystemBase implements CANTestable, Loggable {
   public enum ArmPreset {
     STOW_CUBE(kStowRotationCube),
     STOW_CONE(kStowRotationCone),
-    ANY_PIECE_LOW(kAnyPieceLowRotation),
+    ANY_PIECE_LOW_BACK(kAnyPieceLowBackRotation),
+    ANY_PIECE_LOW_FRONT(kAnyPieceLowFrontRotation),
     CUBE_MID(kCubeMidRotation),
     CONE_MID(kConeMidRotation),
     CUBE_HIGH(kCubeHighRotation),
     CONE_HIGH(kConeHighRotation),
-    CONE_GROUND_INTAKE(kConeGroundIntakeRotation),
+    STANDING_CONE_GROUND_INTAKE(kStandingConeGroundIntakeRotation),
+    SITTING_CONE_GROUND_INTAKE(kTippedConeGroundIntakeRotation),
     CUBE_GROUND_INTAKE(kCubeGroundIntakeRotation),
     DOUBLE_SUBSTATION_CUBE(kDoubleSubstationRotationCube),
     DOUBLE_SUBSTATION_CONE(kDoubleSubstationRotationCone);
@@ -72,24 +81,32 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
     }
 
     System.out.println("Arm initialized");
+    zeroArmEncoderElevatorRelative();
     off();
+
+    getLayout(kDriverTabName).add(new ZeroArm(this));
   }
 
   private void configureRealHardware() {
     armMotor = TalonFXFactory.createDefaultTalon(kArmCANDevice);
-    armMotor.setInverted(true);
+    armMotor.setInverted(TalonFXInvertType.CounterClockwise);
     armEncoder.setDistancePerRotation(kArmRadiansPerAbsoluteEncoderRotation);
+    armEncoder.reset();
 
-    armMotor.setNeutralMode(NeutralMode.Coast);
-    armMotor.setSelectedSensorPosition(0);
-  }
+    if (FeatureFlags.kCalibrationMode) {
+      armMotor.setNeutralMode(NeutralMode.Coast);
+    } else {
+      armMotor.setNeutralMode(NeutralMode.Brake);
+    }
 
-  public void setCoast() {
-    armMotor.setNeutralMode(NeutralMode.Coast);
-  }
-
-  public void setBrake() {
-    armMotor.setNeutralMode(NeutralMode.Brake);
+    if (FeatureFlags.kUseAbsoluteEncoderToInitializeRelative) {
+      double absoluteEncoderRadians =
+          getAbsoluteEncoderDistanceRad() + kAbsoluteEncoderOffsetRadians;
+      armMotor.setSelectedSensorPosition(
+          Conversions.radiansToFalcon(absoluteEncoderRadians, kArmGearing));
+    } else {
+      armMotor.setSelectedSensorPosition(0);
+    }
   }
 
   public double calculateFeedForward(double angleRadians, double velocity) {
@@ -105,42 +122,49 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
         && Units.radiansToDegrees(getArmPositionElevatorRelative()) >= kMinSafeRotation);
   }
 
-  public void zeroMotorEncoder() {
-    armMotor.setSelectedSensorPosition(0);
+  public void zeroArmEncoderElevatorRelative() {
+    armMotor.setSelectedSensorPosition(
+        Conversions.radiansToFalcon(kElevatorAngleOffset, kArmGearing));
   }
 
-  public void zeroThroughboreEncoder() {
-    armEncoder.reset();
+  public double getAbsoluteEncoderDistanceRad() {
+    if (FeatureFlags.kUseAbsoluteEncoderToInitializeRelative) {
+      return armEncoder.getAbsolutePosition() * kArmRadiansPerAbsoluteEncoderRotation;
+    } else {
+      return armEncoder.getDistance();
+    }
   }
 
-  public double getStatorCurrent() {
-    return armMotor.getStatorCurrent();
-  }
-
-  /**
-   * Reset encoder offset. Use when you know where the arm actually is in space but the relative
-   * encoder is off. Useful when the gear skips and you need to change the offset
-   *
-   * @param currentAbsolutePosition The actual position of the arm in space that you want the
-   *     current relative encoder value to reflect. This will change all setpoint for the arm.
-   */
-  public void resetOffset(Rotation2d currentAbsolutePosition) {
-    ArmConstants.kRelativeFalconEncoderOffsetRadians =
-        ArmConstants.kRelativeFalconEncoderOffsetRadians
-            + (currentAbsolutePosition.getRadians() - getArmPositionGroundRelative());
-
-    System.out.println("New arm offset" + ArmConstants.kRelativeFalconEncoderOffsetRadians);
+  public Rotation2d getClosestSafePosition(double elevatorPosition) {
+    if (elevatorPosition > ElevatorConstants.kSafeForArmMinPosition) {
+      return Rotation2d.fromDegrees(
+          MathUtil.clamp(
+              Units.radiansToDegrees(getArmPositionElevatorRelative()),
+              kArmAngleMinConstraint.getDegrees(),
+              kArmAngleMaxConstraint.getDegrees()));
+    } else {
+      return Rotation2d.fromDegrees(
+          MathUtil.clamp(
+              Units.radiansToDegrees(getArmPositionElevatorRelative()),
+              kMinSafeRotation,
+              kMaxSafeRotation));
+    }
   }
 
   public double getArmPositionGroundRelative() {
     if (RobotBase.isReal()) {
-      double absoluteEncoderDistance =
-          armEncoder.getDistance()
-              + Preferences.getDouble(
-                  ArmPreferencesKeys.kAbsoluteEncoderOffsetKey, kAbsoluteEncoderOffsetRadians);
-      if (absoluteEncoderDistance < kArmAngleMinConstraint.getRadians()) {
-        return absoluteEncoderDistance + Math.PI * 2;
+      if (FeatureFlags.kUseRelativeArmEncoder) {
+        return Conversions.falconToRadians(armMotor.getSelectedSensorPosition(), kArmGearing);
       } else {
+        double absoluteEncoderDistance;
+        if (kUsePrefs) {
+          absoluteEncoderDistance =
+              getAbsoluteEncoderDistanceRad()
+                  + Preferences.getDouble(
+                      ArmPreferencesKeys.kAbsoluteEncoderOffsetKey, kAbsoluteEncoderOffsetRadians);
+        } else {
+          absoluteEncoderDistance = getAbsoluteEncoderDistanceRad() + kAbsoluteEncoderOffsetRadians;
+        }
         return absoluteEncoderDistance;
       }
     } else return armSim.getAngleRads();
@@ -150,6 +174,14 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
     return getArmPositionGroundRelative() - kElevatorAngleOffset;
   }
 
+  public void zeroThroughboreEncoder() {
+    armEncoder.reset();
+  }
+
+  public boolean isMotorCurrentSpiking() {
+    return armMotor.getSupplyCurrent() > kZeroArmCurrentThreshold;
+  }
+
   public void off() {
     armMotor.neutralOutput();
   }
@@ -157,12 +189,15 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
   @Override
   public void periodic() {
     if (Constants.kDebugEnabled) {
-      SmartDashboard.putNumber(
-          "Arm Raw Relative Encoder value", armMotor.getSelectedSensorPosition());
-      SmartDashboard.putNumber("Arm Raw Absolute Encoder value", armEncoder.getDistance());
+      // SmartDashboard.putNumber(
+      // "Arm Raw Relative Encoder value", armMotor.getSelectedSensorPosition());
+      // SmartDashboard.putNumber("Arm Raw Absolute Encoder value",
+      // armEncoder.getAbsolutePosition());
+      // SmartDashboard.putNumber(
+      // "Arm Raw Absolute Encoder distance", getAbsoluteEncoderDistanceRad());
       SmartDashboard.putNumber("Arm angle ground relative rad", getArmPositionGroundRelative());
       SmartDashboard.putNumber("Arm angle elevator relative rad", getArmPositionElevatorRelative());
-      SmartDashboard.putNumber("Current Draw", armSim.getCurrentDrawAmps());
+      SmartDashboard.putNumber("Arm Current Draw", armMotor.getSupplyCurrent());
       SmartDashboard.putNumber(
           "Arm motor open loop voltage", armMotor.getMotorOutputPercent() * 12);
       SmartDashboard.putBoolean("Arm encoder connected", armEncoder.isConnected());
@@ -192,6 +227,7 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
             "Angle",
             new DoubleSendable(() -> Math.toDegrees(getArmPositionGroundRelative()), "Gyro"));
     getLayout(kDriverTabName).add(armMotor);
+    getLayout(kDriverTabName).add(new SetArmAngle(this, ArmPreset.STANDING_CONE_GROUND_INTAKE));
   }
 
   @Override
@@ -200,7 +236,7 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
   }
 
   public Rotation2d getArmSetpoint(Arm.ArmPreset setpoint) {
-    if (Constants.FeatureFlags.kUsePrefs) {
+    if (kUsePrefs) {
       return new Rotation2d(
           Preferences.getDouble(
               ArmPreferencesKeys.kArmPositionKeys.get(setpoint),
@@ -219,15 +255,16 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
 
     // Arm Encoder Offset
     Preferences.initDouble(
-        ArmPreferencesKeys.kRelativeEncoderOffsetKey, kRelativeFalconEncoderOffsetRadians);
-    Preferences.initDouble(
         ArmPreferencesKeys.kAbsoluteEncoderOffsetKey, kAbsoluteEncoderOffsetRadians);
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.STOW_CONE), kStowRotationCone.getRadians());
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.STOW_CUBE), kStowRotationCube.getRadians());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW), kAnyPieceLowRotation.getRadians());
+        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW_BACK), kAnyPieceLowBackRotation.getRadians());
+    Preferences.initDouble(
+        kArmPositionKeys.get(ArmPreset.ANY_PIECE_LOW_FRONT),
+        kAnyPieceLowFrontRotation.getRadians());
     Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CUBE_MID), kCubeMidRotation.getRadians());
     Preferences.initDouble(kArmPositionKeys.get(ArmPreset.CONE_MID), kConeMidRotation.getRadians());
     Preferences.initDouble(
@@ -235,7 +272,11 @@ public class Arm extends SubsystemBase implements CANTestable, Loggable {
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.CONE_HIGH), kConeHighRotation.getRadians());
     Preferences.initDouble(
-        kArmPositionKeys.get(ArmPreset.CONE_GROUND_INTAKE), kConeGroundIntakeRotation.getRadians());
+        kArmPositionKeys.get(ArmPreset.STANDING_CONE_GROUND_INTAKE),
+        kStandingConeGroundIntakeRotation.getRadians());
+    Preferences.initDouble(
+        kArmPositionKeys.get(ArmPreset.SITTING_CONE_GROUND_INTAKE),
+        kTippedConeGroundIntakeRotation.getRadians());
     Preferences.initDouble(
         kArmPositionKeys.get(ArmPreset.CUBE_GROUND_INTAKE), kCubeGroundIntakeRotation.getRadians());
     Preferences.initDouble(
