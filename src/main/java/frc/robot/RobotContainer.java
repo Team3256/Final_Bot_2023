@@ -256,7 +256,7 @@ public class RobotContainer implements CANTestable, Loggable {
                   () -> modeChooser.getSelected().equals(Mode.AUTO_SCORE),
                   this::isCurrentPieceCone));
 
-      //hi
+      // hi
 
       driver
           .y()
