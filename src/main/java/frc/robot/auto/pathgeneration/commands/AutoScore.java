@@ -46,7 +46,6 @@ public class AutoScore extends ParentCommand {
     HIGH,
     MID,
     LOW,
-    NULL
   }
 
   private SwerveDrive swerveSubsystem;

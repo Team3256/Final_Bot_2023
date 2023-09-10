@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FeatureFlags;
 import frc.robot.arm.Arm;
 import frc.robot.arm.ArmConstants;
@@ -269,6 +270,18 @@ public class RobotContainer implements CANTestable, Loggable {
                   () -> true,
                   () -> isMovingJoystick(driver),
                   true));
+      new Trigger(this::scoreTriggered)
+          .onTrue(
+              new AutoScore(
+                  swerveSubsystem,
+                  intakeSubsystem,
+                  elevatorSubsystem,
+                  armSubsystem,
+                  ledSubsystem,
+                  this::isCurrentPieceCone,
+                  () -> true,
+                  () -> isMovingJoystick(driver),
+                  true));
 
       driver
           .y()
@@ -306,6 +319,10 @@ public class RobotContainer implements CANTestable, Loggable {
     }
 
     operator.a().toggleOnTrue(new InstantCommand(this::toggleSubstationLocation));
+  }
+
+  private boolean scoreTriggered() {
+    return SmartDashboard.getBoolean("scoreTriggered", false);
   }
 
   private void configureIntake() {
