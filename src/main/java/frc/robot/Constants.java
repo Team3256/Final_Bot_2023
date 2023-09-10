@@ -19,13 +19,10 @@ public final class Constants {
   public static final boolean kDebugEnabled = true;
   public static final boolean kCommandDebugLogEnabled = true;
   public static final boolean kSwerveEnabled = true;
-  public static final boolean kClimbEnabled = false;
   public static final boolean kIntakeEnabled = true;
   public static final boolean kElevatorEnabled = true;
   public static final boolean kArmEnabled = true;
   public static final boolean kLedStripEnabled = true;
-
-  public static final boolean kAdvantageKitReplayEnabled = false;
 
   public static final RobotType kRobotType = RobotType.FINAL;
   public static final RobotMode kCurrentMode = RobotMode.SIM;
@@ -43,8 +40,8 @@ public final class Constants {
     public static final boolean kUsePrefs = false;
     public static final boolean kCalibrationMode = false;
 
-    public static final boolean kAutoScoreEnabled = false;
-    public static final boolean kAutoOuttakeEnabled = false;
+    public static final boolean kAutoScoreEnabled = true;
+    public static final boolean kAutoOuttakeEnabled = true;
     public static final boolean kIntakeAutoScoreDistanceSensorOffset = false;
 
     public static final boolean kOperatorManualArmControlEnabled = false;
@@ -54,11 +51,10 @@ public final class Constants {
     public static final boolean kLocalizationStdDistanceBased = true;
     public static final boolean kLocalizationDataCollectionMode = false;
     public static final boolean kLocalizeDuringAuto = true;
-    public static final boolean kDynamicPathGenEnabled = false;
+    public static final boolean kDynamicPathGenEnabled = true;
 
     public static final boolean kShuffleboardLayoutEnabled = true;
     public static final boolean kSwerveAccelerationLimitingEnabled = false;
-    public static final boolean kGamePieceDetection = false;
 
     public static final boolean kPitRoutineEnabled = false;
     public static final boolean kCanTestEnabled = false;
