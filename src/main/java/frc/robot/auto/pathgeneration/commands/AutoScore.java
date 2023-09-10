@@ -8,6 +8,7 @@
 package frc.robot.auto.pathgeneration.commands;
 
 import static frc.robot.Constants.FeatureFlags.kAutoOuttakeEnabled;
+import static frc.robot.Constants.FeatureFlags.kDynamicPathGenEnabled;
 import static frc.robot.auto.dynamicpathgeneration.DynamicPathConstants.*;
 import static frc.robot.led.LEDConstants.*;
 
@@ -185,7 +186,7 @@ public class AutoScore extends ParentCommand {
       }
 
       Command moveToScoringWaypoint;
-      if (kDynamicPathGenerationEnabled) {
+      if (kDynamicPathGenEnabled) {
         DynamicPathGenerator gen =
             new DynamicPathGenerator(start, scoringWaypoint, swerveSubsystem);
         moveToScoringWaypoint = gen.getCommand();
