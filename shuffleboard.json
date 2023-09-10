@@ -11,52 +11,440 @@
         "vgap": 16.0,
         "titleType": 0,
         "tiles": {
-          "5,0": {
+          "0,0": {
             "size": [
               2,
-              2
+              1
             ],
             "content": {
               "_type": "Field",
               "_source0": "network_table:///SmartDashboard/Limelight Localization Field",
-              "_title": "SmartDashboard/Limelight Localization Field",
+              "_title": "Limelight Localization Field",
               "_glyph": 148,
               "_showGlyph": false,
-              "Game/Game": "A2023_Charged_Up",
+              "Game/Game": "A2022_Rapid_React",
               "Visuals/Robot Icon Size": 50.0,
               "Visuals/Show Outside Circles": false
             }
           },
           "2,0": {
             "size": [
-              3,
-              3
+              2,
+              1
             ],
             "content": {
-              "_type": "Camera Stream",
-              "_source0": "camera_server://Port_1182_MJPEG_Server",
-              "_title": "Port_1182_MJPEG_Server",
+              "_type": "Field",
+              "_source0": "network_table:///SmartDashboard/Field",
+              "_title": "Field",
               "_glyph": 148,
               "_showGlyph": false,
-              "Crosshair/Show crosshair": true,
-              "Crosshair/Crosshair color": "#FFFFFFFF",
-              "Controls/Show controls": true,
-              "Controls/Rotation": "NONE",
-              "compression": -1.0,
-              "fps": -1,
-              "imageWidth": 0,
-              "imageHeight": 0
+              "Game/Game": "A2022_Rapid_React",
+              "Visuals/Robot Icon Size": 50.0,
+              "Visuals/Show Outside Circles": false
             }
           },
-          "7,0": {
+          "4,0": {
             "size": [
-              3,
-              4
+              1,
+              1
             ],
             "content": {
-              "_type": "Network Table Tree",
-              "_source0": "network_table:///limelight",
-              "_title": "limelight",
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/Auto Score Toggle",
+              "_title": "Auto Score Toggle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "5,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Current Double Substation Location",
+              "_title": "Current Double Substation Location",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "6,0": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Field",
+              "_source0": "network_table:///SmartDashboard/Auto Visualization",
+              "_title": "Auto Visualization",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Game/Game": "A2022_Rapid_React",
+              "Visuals/Robot Icon Size": 50.0,
+              "Visuals/Show Outside Circles": false
+            }
+          },
+          "8,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/Auto Chooser",
+              "_title": "Auto Chooser",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "0,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/backgroundColor",
+              "_title": "Robot Sim/backgroundColor",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Robot Root/x",
+              "_title": "Robot Sim/Robot Root/x",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "2,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Robot Root/y",
+              "_title": "Robot Sim/Robot Root/y",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "3,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/x",
+              "_title": "Robot Sim/Elevator Root/x",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/y",
+              "_title": "Robot Sim/Elevator Root/y",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "5,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Robot Root/Drive Chassis/angle",
+              "_title": "Robot Sim/Robot Root/Drive Chassis/angle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "6,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Robot Root/Drive Chassis/length",
+              "_title": "Robot Sim/Robot Root/Drive Chassis/length",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "7,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Robot Root/Drive Chassis/color",
+              "_title": "Robot Sim/Robot Root/Drive Chassis/color",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "8,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Robot Root/Drive Chassis/weight",
+              "_title": "Robot Sim/Robot Root/Drive Chassis/weight",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "0,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Initial Elevator Height/angle",
+              "_title": "Robot Sim/Elevator Root/Initial Elevator Height/angle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Initial Elevator Height/length",
+              "_title": "Robot Sim/Elevator Root/Initial Elevator Height/length",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "2,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Initial Elevator Height/color",
+              "_title": "Robot Sim/Elevator Root/Initial Elevator Height/color",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "3,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Initial Elevator Height/weight",
+              "_title": "Robot Sim/Elevator Root/Initial Elevator Height/weight",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/angle",
+              "_title": "Robot Sim/Elevator Root/Elevator/angle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "5,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/length",
+              "_title": "Robot Sim/Elevator Root/Elevator/length",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "6,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/color",
+              "_title": "Robot Sim/Elevator Root/Elevator/color",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "7,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/weight",
+              "_title": "Robot Sim/Elevator Root/Elevator/weight",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "8,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Elevator Right/angle",
+              "_title": "Robot Sim/Elevator Root/Elevator/Elevator Right/angle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "0,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Elevator Right/length",
+              "_title": "Robot Sim/Elevator Root/Elevator/Elevator Right/length",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Elevator Right/color",
+              "_title": "Robot Sim/Elevator Root/Elevator/Elevator Right/color",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "2,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Elevator Right/weight",
+              "_title": "Robot Sim/Elevator Root/Elevator/Elevator Right/weight",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "3,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Arm Pivot/angle",
+              "_title": "Robot Sim/Elevator Root/Elevator/Arm Pivot/angle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Arm Pivot/length",
+              "_title": "Robot Sim/Elevator Root/Elevator/Arm Pivot/length",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "5,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Arm Pivot/color",
+              "_title": "Robot Sim/Elevator Root/Elevator/Arm Pivot/color",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "6,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Arm Pivot/weight",
+              "_title": "Robot Sim/Elevator Root/Elevator/Arm Pivot/weight",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "7,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Arm Pivot/Arm/angle",
+              "_title": "Robot Sim/Elevator Root/Elevator/Arm Pivot/Arm/angle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "8,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Sim/Elevator Root/Elevator/Arm Pivot/Arm/length",
+              "_title": "Robot Sim/Elevator Root/Elevator/Arm Pivot/Arm/length",
               "_glyph": 148,
               "_showGlyph": false
             }
@@ -80,8 +468,8 @@
   ],
   "windowGeometry": {
     "x": 0.0,
-    "y": 0.0,
-    "width": 1536.0,
-    "height": 824.0
+    "y": 35.0,
+    "width": 1352.0,
+    "height": 792.0
   }
 }
