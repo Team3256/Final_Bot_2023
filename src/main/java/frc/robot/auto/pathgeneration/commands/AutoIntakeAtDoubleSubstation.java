@@ -13,6 +13,7 @@ import static frc.robot.led.LEDConstants.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -33,7 +34,6 @@ import frc.robot.led.commands.SetAllBlink;
 import frc.robot.led.commands.SetAllColor;
 import frc.robot.swerve.SwerveDrive;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 public class AutoIntakeAtDoubleSubstation extends ParentCommand {
   public enum SubstationLocation {
@@ -47,7 +47,6 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
   private Elevator elevatorSubsystem;
   private Arm armSubsystem;
   private LED ledSubsystem;
-  private Supplier<SubstationLocation> substationLocation;
   private BooleanSupplier cancelCommand;
   private BooleanSupplier isAutoScoreMode;
   private BooleanSupplier isCurrentPieceCone;
@@ -58,7 +57,6 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
       Elevator elevatorSubsystem,
       Arm armSubsystem,
       LED ledSubsystem,
-      Supplier<SubstationLocation> substationLocation,
       BooleanSupplier cancelCommand,
       BooleanSupplier isAutoScoreMode,
       BooleanSupplier isCurrentPieceCone) {
@@ -68,7 +66,6 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
     this.elevatorSubsystem = elevatorSubsystem;
     this.armSubsystem = armSubsystem;
     this.ledSubsystem = ledSubsystem;
-    this.substationLocation = substationLocation;
     this.isAutoScoreMode = isAutoScoreMode;
     this.cancelCommand = cancelCommand;
     this.isCurrentPieceCone = isCurrentPieceCone;
@@ -131,7 +128,25 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
       Alliance alliance = DriverStation.getAlliance();
 
       Pose2d end;
-      if (substationLocation.get().equals(SubstationLocation.RIGHT_SIDE)) {
+      SubstationLocation substationLocation;
+      int guiStation = (int) SmartDashboard.getNumber("guiStation", -1);
+      if (guiStation < 0 || guiStation > 1) {
+        System.out.println("guiStation was invalid (" + guiStation + ")");
+        new SetAllColor(ledSubsystem, kError).withTimeout(2.5).schedule();
+        return;
+      }
+      switch (guiStation) {
+        case 0:
+          substationLocation = SubstationLocation.LEFT_SIDE;
+          break;
+        case 1:
+          substationLocation = SubstationLocation.RIGHT_SIDE;
+          break;
+        default:
+          substationLocation = SubstationLocation.LEFT_SIDE;
+          break;
+      }
+      if (substationLocation.equals(SubstationLocation.RIGHT_SIDE)) {
         // Left and right are different depending on alliance
         if (alliance == Alliance.Red) {
           end = kBlueOuterDoubleSubstationPose;

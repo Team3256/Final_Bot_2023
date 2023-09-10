@@ -242,34 +242,6 @@ public class RobotContainer implements CANTestable, Loggable {
                 .until(() -> isMovingJoystick(driver)));
 
     if (kElevatorEnabled && kArmEnabled && kLedStripEnabled) {
-
-      driver
-          .leftTrigger()
-          .onTrue(
-              new AutoIntakeAtDoubleSubstation(
-                  swerveSubsystem,
-                  intakeSubsystem,
-                  elevatorSubsystem,
-                  armSubsystem,
-                  ledSubsystem,
-                  () -> doubleSubstationLocation,
-                  () -> isMovingJoystick(driver),
-                  () -> modeChooser.getSelected().equals(Mode.AUTO_SCORE),
-                  this::isCurrentPieceCone));
-
-      driver
-          .rightTrigger()
-          .onTrue(
-              new AutoScore(
-                  swerveSubsystem,
-                  intakeSubsystem,
-                  elevatorSubsystem,
-                  armSubsystem,
-                  ledSubsystem,
-                  this::isCurrentPieceCone,
-                  () -> true,
-                  () -> isMovingJoystick(driver),
-                  true));
       new Trigger(this::scoreTriggered)
           .onTrue(
               new AutoScore(
@@ -282,43 +254,24 @@ public class RobotContainer implements CANTestable, Loggable {
                   () -> true,
                   () -> isMovingJoystick(driver),
                   true));
-
-      driver
-          .y()
+      new Trigger(this::intakeTriggered)
           .onTrue(
-              new AutoScore(
+              new AutoIntakeAtDoubleSubstation(
                   swerveSubsystem,
                   intakeSubsystem,
                   elevatorSubsystem,
                   armSubsystem,
                   ledSubsystem,
-                  this::isCurrentPieceCone,
-                  () -> false,
-                  () -> false,
-                  false));
-
-      driver
-          .b()
-          .onTrue(
-              new AutoScore(
-                  swerveSubsystem,
-                  intakeSubsystem,
-                  elevatorSubsystem,
-                  armSubsystem,
-                  ledSubsystem,
-                  this::isCurrentPieceCone,
-                  () -> modeChooser.getSelected().equals(Mode.AUTO_SCORE),
                   () -> isMovingJoystick(driver),
-                  true));
-
-      operator
-          .rightBumper()
-          .onTrue(new InstantCommand(() -> setScoreLocation(GridScoreHeight.HIGH)));
-      operator.povUp().onTrue(new InstantCommand(() -> setScoreLocation(GridScoreHeight.MID)));
-      operator.povDown().onTrue(new InstantCommand(() -> setScoreLocation(GridScoreHeight.LOW)));
+                  () -> modeChooser.getSelected().equals(Mode.AUTO_SCORE),
+                  this::isCurrentPieceCone));
     }
 
     operator.a().toggleOnTrue(new InstantCommand(this::toggleSubstationLocation));
+  }
+
+  private boolean intakeTriggered() {
+    return SmartDashboard.getBoolean("intakeTriggered", false);
   }
 
   private boolean scoreTriggered() {
