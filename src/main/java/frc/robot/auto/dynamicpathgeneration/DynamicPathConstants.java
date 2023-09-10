@@ -27,7 +27,6 @@ import java.util.ArrayList;
 public final class DynamicPathConstants {
   // Flags
   public static final boolean kDynamicPathGenerationDebug = true && Constants.kDebugEnabled;
-  public static final boolean kDynamicPathGenerationEnabled = false;
 
   // Bezier
   public static final double kRegularControlPointScalar = 0.5;
