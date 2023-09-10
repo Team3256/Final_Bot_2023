@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.arm.Arm;
+import frc.robot.auto.dynamicpathgeneration.DynamicPathGenerator;
 import frc.robot.auto.dynamicpathgeneration.helpers.PathUtil;
 import frc.robot.auto.pathgeneration.PathGeneration;
 import frc.robot.elevator.Elevator;
@@ -157,12 +158,20 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
       }
 
       // commands that will be run sequentially
-      Command moveToWaypoint =
-          PathGeneration.createDynamicAbsolutePath(
-              swerveSubsystem.getPose(),
-              substationWaypoint,
-              swerveSubsystem,
-              kWaypointPathConstraints);
+      Command moveToWaypoint;
+      if (kDynamicPathGenerationDebug) {
+        DynamicPathGenerator dpg =
+            new DynamicPathGenerator(
+                swerveSubsystem.getPose(), substationWaypoint, swerveSubsystem);
+        moveToWaypoint = dpg.getCommand();
+      } else {
+        moveToWaypoint =
+            PathGeneration.createDynamicAbsolutePath(
+                swerveSubsystem.getPose(),
+                substationWaypoint,
+                swerveSubsystem,
+                kWaypointPathConstraints);
+      }
 
       Command moveToSubstation =
           PathGeneration.createDynamicAbsolutePath(
