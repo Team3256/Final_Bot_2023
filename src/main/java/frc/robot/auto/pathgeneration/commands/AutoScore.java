@@ -40,13 +40,13 @@ import frc.robot.led.commands.SetAllBlink;
 import frc.robot.led.commands.SetAllColor;
 import frc.robot.swerve.SwerveDrive;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 public class AutoScore extends ParentCommand {
   public enum GridScoreHeight {
     HIGH,
     MID,
-    LOW
+    LOW,
+    NULL
   }
 
   private SwerveDrive swerveSubsystem;
@@ -54,7 +54,6 @@ public class AutoScore extends ParentCommand {
   private Arm armSubsystem;
   private LED ledSubsystem;
   private Intake intakeSubsystem;
-  private Supplier<GridScoreHeight> gridScoreHeight;
   private BooleanSupplier cancelCommand;
   private BooleanSupplier isOperatorSelectingCone;
   private BooleanSupplier isAutoScoreMode;
@@ -66,32 +65,6 @@ public class AutoScore extends ParentCommand {
       Elevator elevatorSubsystem,
       Arm armSubsystem,
       LED ledSubsystem,
-      GridScoreHeight gridScoreHeight,
-      BooleanSupplier isOperatorSelectingCone,
-      BooleanSupplier isAutoScoreMode,
-      BooleanSupplier cancelCommand,
-      boolean isScoringFront) {
-
-    this(
-        swerveDrive,
-        intakeSubsystem,
-        elevatorSubsystem,
-        armSubsystem,
-        ledSubsystem,
-        () -> gridScoreHeight,
-        isOperatorSelectingCone,
-        isAutoScoreMode,
-        cancelCommand,
-        isScoringFront);
-  }
-
-  public AutoScore(
-      SwerveDrive swerveDrive,
-      Intake intakeSubsystem,
-      Elevator elevatorSubsystem,
-      Arm armSubsystem,
-      LED ledSubsystem,
-      Supplier<GridScoreHeight> gridScoreHeight,
       BooleanSupplier isOperatorSelectingCone,
       BooleanSupplier isAutoScoreMode,
       BooleanSupplier cancelCommand,
@@ -102,7 +75,6 @@ public class AutoScore extends ParentCommand {
     this.elevatorSubsystem = elevatorSubsystem;
     this.armSubsystem = armSubsystem;
     this.ledSubsystem = ledSubsystem;
-    this.gridScoreHeight = gridScoreHeight;
     this.isAutoScoreMode = isAutoScoreMode;
     this.isOperatorSelectingCone = isOperatorSelectingCone;
     this.cancelCommand = cancelCommand;
@@ -118,7 +90,29 @@ public class AutoScore extends ParentCommand {
     Command moveArmElevatorToPreset;
     boolean isRedAlliance = DriverStation.getAlliance() == Alliance.Red;
 
-    switch (gridScoreHeight.get()) {
+    GridScoreHeight gridScoreHeight;
+    int guiRow = (int) SmartDashboard.getNumber("guiRow", -1);
+    if (guiRow < 0 || guiRow > 2) {
+      System.out.println("guiRow was invalid (" + guiRow + ")");
+      new SetAllColor(ledSubsystem, kError).withTimeout(2.5).schedule();
+      return;
+    }
+    switch (guiRow) {
+      case 0:
+        gridScoreHeight = GridScoreHeight.HIGH;
+        break;
+      case 1:
+        gridScoreHeight = GridScoreHeight.MID;
+        break;
+      case 2:
+        gridScoreHeight = GridScoreHeight.LOW;
+        break;
+      default:
+        gridScoreHeight = GridScoreHeight.LOW;
+        break;
+    }
+
+    switch (gridScoreHeight) {
       case HIGH:
         moveArmElevatorToPreset =
             new ConditionalCommand(
@@ -166,21 +160,21 @@ public class AutoScore extends ParentCommand {
       Pose2d start = swerveSubsystem.getPose();
 
       // Get scoring location id from SD
-      int locationId = (int) SmartDashboard.getNumber("guiColumn", -1);
-      if (DriverStation.getAlliance() == Alliance.Blue) {
-        locationId = 8 - locationId;
-      }
-      if (0 > locationId || locationId > 8) {
-        System.out.println("locationId was invalid (" + locationId + ")");
+      int guiColumn = (int) SmartDashboard.getNumber("guiColumn", -1);
+      if (0 > guiColumn || guiColumn > 8) {
+        System.out.println("guiColumn was invalid (" + guiColumn + ")");
         new SetAllColor(ledSubsystem, kError).withTimeout(2.5).schedule();
         return;
       }
+      if (DriverStation.getAlliance() == Alliance.Blue) {
+        guiColumn = 8 - guiColumn;
+      }
 
       // Move to scoring waypoint
-      Pose2d scoringWaypoint = kBlueScoreWaypointPoses[locationId];
-      GamePiece scoringGamePiece = kScoringLocationPiece[locationId];
+      Pose2d scoringWaypoint = kBlueScoreWaypointPoses[guiColumn];
+      GamePiece scoringGamePiece = kScoringLocationPiece[guiColumn];
 
-      System.out.println("Running: Go to grid (id: " + locationId + ") from " + start);
+      System.out.println("Running: Go to grid (id: " + guiColumn + ") from " + start);
       if (isRedAlliance) {
         scoringWaypoint = PathUtil.flip(scoringWaypoint);
       }
@@ -205,15 +199,15 @@ public class AutoScore extends ParentCommand {
       // Set arm and elevator command and end pose based on node type and height
       Pose2d scoringLocation;
 
-      switch (gridScoreHeight.get()) {
+      switch (gridScoreHeight) {
         case HIGH:
-          scoringLocation = kHighBlueScoringPoses[locationId];
+          scoringLocation = kHighBlueScoringPoses[guiColumn];
           break;
         case MID:
-          scoringLocation = kMidBlueScoringPoses[locationId];
+          scoringLocation = kMidBlueScoringPoses[guiColumn];
           break;
         default:
-          scoringLocation = kBottomBlueScoringPoses[locationId];
+          scoringLocation = kBottomBlueScoringPoses[guiColumn];
       }
 
       if (FeatureFlags.kIntakeAutoScoreDistanceSensorOffset && isSelectedNodeCone.getAsBoolean()) {

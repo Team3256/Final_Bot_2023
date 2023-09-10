@@ -256,7 +256,19 @@ public class RobotContainer implements CANTestable, Loggable {
                   () -> modeChooser.getSelected().equals(Mode.AUTO_SCORE),
                   this::isCurrentPieceCone));
 
-      // hi
+      driver
+          .rightTrigger()
+          .onTrue(
+              new AutoScore(
+                  swerveSubsystem,
+                  intakeSubsystem,
+                  elevatorSubsystem,
+                  armSubsystem,
+                  ledSubsystem,
+                  this::isCurrentPieceCone,
+                  () -> true,
+                  () -> isMovingJoystick(driver),
+                  true));
 
       driver
           .y()
@@ -267,7 +279,6 @@ public class RobotContainer implements CANTestable, Loggable {
                   elevatorSubsystem,
                   armSubsystem,
                   ledSubsystem,
-                  AutoScore.GridScoreHeight.LOW,
                   this::isCurrentPieceCone,
                   () -> false,
                   () -> false,
@@ -282,7 +293,6 @@ public class RobotContainer implements CANTestable, Loggable {
                   elevatorSubsystem,
                   armSubsystem,
                   ledSubsystem,
-                  () -> currentScoringPreset,
                   this::isCurrentPieceCone,
                   () -> modeChooser.getSelected().equals(Mode.AUTO_SCORE),
                   () -> isMovingJoystick(driver),
@@ -311,15 +321,15 @@ public class RobotContainer implements CANTestable, Loggable {
                 .asProxy());
 
     if (kArmEnabled && kElevatorEnabled) {
-      driver
-          .rightTrigger()
-          .onTrue(
-              new GroundIntake(
-                  elevatorSubsystem,
-                  armSubsystem,
-                  intakeSubsystem,
-                  ConeOrientation.STANDING_CONE,
-                  this::isCurrentPieceCone));
+      //      driver
+      //          .rightTrigger()
+      //          .onTrue(
+      //              new GroundIntake(
+      //                  elevatorSubsystem,
+      //                  armSubsystem,
+      //                  intakeSubsystem,
+      //                  ConeOrientation.STANDING_CONE,
+      //                  this::isCurrentPieceCone));
 
       driver
           .rightBumper()
