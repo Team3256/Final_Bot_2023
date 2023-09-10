@@ -32,6 +32,7 @@ public class DynamicPathGenerator {
     this.srcPose = srcPose;
     this.sinkPose = sinkPose;
     this.swerveDrive = swerveDrive;
+    // new copy of dynamicPathNodes so we don't edit the constant ones
     dynamicPathNodes = new ArrayList<>();
     if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       dynamicPathNodes.addAll(blueDynamicPathWayNodes);
@@ -40,7 +41,7 @@ public class DynamicPathGenerator {
     }
     srcNode = new PathNode(srcPose.getX(), srcPose.getY(), PathNode.NodeType.SRC);
     sinkNode = new PathNode(sinkPose.getX(), sinkPose.getY(), PathNode.NodeType.SINK);
-    // start node must be added before goal node
+    // start node must be added before goal node, and only at the end
     dynamicPathNodes.add(srcNode);
     dynamicPathNodes.add(sinkNode);
   }
@@ -64,14 +65,14 @@ public class DynamicPathGenerator {
   }
 
   public List<Integer> getPathIds() {
-    // PathNode srcClosest = connectToClosest(dynamicPathNodes.get(src),
-    // dynamicPathNodes);
+    // integrate src, sink into the graph
     PathUtil.fullyConnect(srcNode, blueDynamicPathWayNodes);
     PathNode sinkClosest = connectToClosest(sinkNode, dynamicPathNodes);
     if (kDynamicPathGenerationDebug) {
       System.out.println("src edges:" + srcNode.getEdges().size());
       System.out.println("sink edges:" + sinkNode.getEdges().size());
     }
+    // run pathFinder
     DynamicPathFinder pathFinder =
         new DynamicPathFinder(srcNode.getIndex(), sinkNode.getIndex(), dynamicPathNodes);
     List<Integer> pathIndexes = pathFinder.findPath();
@@ -79,7 +80,8 @@ public class DynamicPathGenerator {
       System.out.println("These are the path indexes:");
       System.out.println(pathIndexes);
     }
-    // PathUtil.fullyDisconnect(srcClosest, dynamicPathNodes.get(src));
+    // delete src, sink from the graph
+    PathUtil.fullyDisconnect(srcNode, blueDynamicPathWayNodes);
     PathUtil.fullyDisconnect(sinkClosest, sinkNode);
     return pathIndexes;
   }
