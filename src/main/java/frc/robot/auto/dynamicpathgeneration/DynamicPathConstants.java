@@ -35,7 +35,7 @@ public final class DynamicPathConstants {
 
   // Obstacles
   public static final Obstacle kBarrierAboveGrid =
-      new Obstacle(new Translation2d(0, 5.48), 3.27, 0.02);
+      new Obstacle(new Translation2d(0, 5.48), 3.27, 0.001);
   public static final Obstacle kLowerWall = new Obstacle(new Translation2d(0, 0), kFieldLength, 0);
   public static final Obstacle kChargingStation =
       new Obstacle(
@@ -53,7 +53,7 @@ public final class DynamicPathConstants {
   public static final ArrayList<PathNode> blueDynamicPathWayNodes = new ArrayList<>();
   public static final ArrayList<PathNode> redDynamicPathWayNodes = new ArrayList<>();
   public static final double preSinkX = 2.10;
-  public static final double preSinkEndpointsOffset = 0.3;
+  public static final double preSinkEndpointsOffset = 0; // 0.3 suffices, 0 is risky
   public static final double passagePoints = 8;
 
   // TODO: `Find a way for this to not be called during first command press (takes 45 ms gen), since
@@ -144,5 +144,6 @@ public final class DynamicPathConstants {
   // Path finding constraints
   public static final double INF_TIME = Double.MAX_VALUE / 10;
   public static final double ILLEGAL_TIME = Double.MAX_VALUE / 20;
-  public static final double kRobotRadius = 0.47 * Math.sqrt(2);
+  public static final double kRobotRadius =
+      0.47 * Math.sqrt(1); // replace to 2 if you feel aggressive
 }
