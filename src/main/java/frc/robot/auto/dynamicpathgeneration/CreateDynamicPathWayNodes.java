@@ -47,18 +47,24 @@ public class CreateDynamicPathWayNodes {
     PathUtil.fullyConnect(preSinks.get(1), bottomPassageSink);
 
     // --add station nodes--
-    PathNode leftStation = new PathNode(6.28, 6.39, PathNode.NodeType.NORMAL);
-    blueDynamicPathWayNodes.add(leftStation);
-    // link left station node with top and bottom passage src
-    PathUtil.fullyConnect(leftStation, topPassageSrc);
-    PathUtil.fullyConnect(leftStation, bottomPassageSrc);
+    double stationXLine = 9.87;
 
-    PathNode rightStation =
-        new PathNode(Constants.FieldConstants.kFieldLength - 6.28, 6.39, PathNode.NodeType.NORMAL);
-    blueDynamicPathWayNodes.add(rightStation);
-    // link right station node with top and bottom passage src
-    PathUtil.fullyConnect(rightStation, topPassageSrc);
-    PathUtil.fullyConnect(rightStation, bottomPassageSrc);
+    //    PathNode topStation = new PathNode(6.28, 6.39, PathNode.NodeType.NORMAL);
+    //    blueDynamicPathWayNodes.add(topStation);
+    //    // link top station node with top and bottom passage src
+    //    PathUtil.fullyConnect(topStation, topPassageSrc);
+    //    PathUtil.fullyConnect(topStation, bottomPassageSrc);
+
+    PathNode bottomStation =
+        new PathNode(
+            stationXLine, Constants.FieldConstants.LoadingZone.kMidY, PathNode.NodeType.NORMAL);
+    blueDynamicPathWayNodes.add(bottomStation);
+    // link bottom station node with top and bottom passage src
+    PathUtil.fullyConnect(bottomStation, topPassageSrc);
+    PathUtil.fullyConnect(bottomStation, bottomPassageSrc);
+
+    // link stations together
+    //    PathUtil.fullyConnect(leftStation, rightStation);
 
     // create redDynamicPathWayNodes
     for (PathNode node : blueDynamicPathWayNodes) {
