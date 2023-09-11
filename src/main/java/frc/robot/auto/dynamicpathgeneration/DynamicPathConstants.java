@@ -29,7 +29,7 @@ public final class DynamicPathConstants {
   public static final boolean kDynamicPathGenerationDebug = true && Constants.kDebugEnabled;
 
   // Bezier
-  public static final double kRegularControlPointScalar = 0.5;
+  public static final double kRegularControlPointScalar = 0.3;
   public static final double kBetweenPreSinkPointScalar = 0.1;
   public static final double kBetweenPassageControlPointScalar = 0.90;
 
@@ -56,8 +56,8 @@ public final class DynamicPathConstants {
   public static final double preSinkEndpointsOffset = 0.3;
   public static final double passagePoints = 8;
 
-  // TODO: Find a way for this to not be called during first command press (takes
-  // 45 ms gen)
+  // TODO: `Find a way for this to not be called during first command press (takes 45 ms gen), since
+  // this static method is not doing that`
   static {
     if (FeatureFlags.kDynamicPathGenEnabled) CreateDynamicPathWayNodes.init();
   }
