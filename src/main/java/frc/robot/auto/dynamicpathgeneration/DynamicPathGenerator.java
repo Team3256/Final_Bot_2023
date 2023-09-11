@@ -66,7 +66,8 @@ public class DynamicPathGenerator {
 
   public List<Integer> getPathIds() {
     // integrate src, sink into the graph
-    PathUtil.fullyConnect(srcNode, blueDynamicPathWayNodes);
+    // PathUtil.fullyConnect(srcNode, blueDynamicPathWayNodes);
+    PathNode srcClosest = connectToClosest(srcNode, dynamicPathNodes);
     PathNode sinkClosest = connectToClosest(sinkNode, dynamicPathNodes);
     if (kDynamicPathGenerationDebug) {
       System.out.println("src edges:" + srcNode.getEdges().size());
@@ -81,8 +82,9 @@ public class DynamicPathGenerator {
       System.out.println(pathIndexes);
     }
     // delete src, sink from the graph
-    PathUtil.fullyDisconnect(srcNode, blueDynamicPathWayNodes);
+    // PathUtil.fullyDisconnect(srcNode, blueDynamicPathWayNodes);
     PathUtil.fullyDisconnect(sinkClosest, sinkNode);
+    PathUtil.fullyDisconnect(srcClosest, srcNode);
     return pathIndexes;
   }
 
