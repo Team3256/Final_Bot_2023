@@ -85,7 +85,19 @@ public class PathUtil {
     }
   }
 
+  public static void fullyConnect(PathNode u, ArrayList<PathNode> pathNodes, boolean safe) {
+    for (PathNode v : pathNodes) {
+      fullyConnect(u, v, safe);
+    }
+  }
+
   public static void fullyConnect(PathNode u, PathNode v) {
+    u.addEdge(v.getIndex());
+    v.addEdge(u.getIndex());
+  }
+
+  public static void fullyConnect(PathNode u, PathNode v, boolean safe) {
+    if (safe && doesPathSegmentHitObstacles(u.getPoint(), v.getPoint())) return;
     u.addEdge(v.getIndex());
     v.addEdge(u.getIndex());
   }
