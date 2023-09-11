@@ -60,6 +60,8 @@ public class CreateDynamicPathWayNodes {
             stationXLine, Constants.FieldConstants.LoadingZone.kMidY, PathNode.NodeType.NORMAL);
     blueDynamicPathWayNodes.add(bottomStation);
     // link bottom station node with top and bottom passage src
+    // PathUtil.fullyConnect(bottomStation, topPassage);
+    // PathUtil.fullyConnect(bottomStation, bottomPassage);
     PathUtil.fullyConnect(bottomStation, topPassageSrc);
     PathUtil.fullyConnect(bottomStation, bottomPassageSrc);
 
