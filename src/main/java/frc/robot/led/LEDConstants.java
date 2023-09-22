@@ -16,5 +16,6 @@ public class LEDConstants {
   public static final Color kLockSwerve = Color.green;
   public static final Color kSuccess = Color.green;
   public static final Color kError = Color.red;
+  // A nice shade of green
   public static final Color kDefault = new Color(0.3803921569f, 1.0f, 0.5450980392f);
 }
