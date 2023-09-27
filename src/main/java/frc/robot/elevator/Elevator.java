@@ -68,7 +68,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
   private WPI_TalonFX elevatorFollowerMotor;
   private final ElevatorFeedforward elevatorFeedforward =
       new ElevatorFeedforward(kElevatorS, kElevatorG, kElevatorV, kElevatorA);
-  private DigitalInput zeroLimitSwitch;
+  // private DigitalInput zeroLimitSwitch;
 
   public Elevator() {
     if (RobotBase.isReal()) {
@@ -97,7 +97,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     elevatorFollowerMotor.setInverted(InvertType.FollowMaster);
     elevatorFollowerMotor.setNeutralMode(NeutralMode.Brake);
     zeroElevator();
-    zeroLimitSwitch = new DigitalInput(kElevatorLimitSwitchDIO);
+    // zeroLimitSwitch = new DigitalInput(kElevatorLimitSwitchDIO);
   }
 
   public boolean isMotorCurrentSpiking() {
@@ -108,9 +108,17 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     }
   }
 
-  public boolean isZeroLimitSwitchTriggered() {
-    return !zeroLimitSwitch.get();
+  public boolean isMotorCurrentSpikingZeroElev() {
+    if (RobotBase.isReal()) {
+      return elevatorMotor.getSupplyCurrent() >= kElevatorZeroCurrentThreshold;
+    } else {
+      return elevatorSim.getCurrentDrawAmps() >= kElevatorZeroCurrentThreshold;
+    }
   }
+
+  // public boolean isZeroLimitSwitchTriggered() {
+  //   return !zeroLimitSwitch.get();
+  // }
 
   public double calculateFeedForward(double velocity) {
     return elevatorFeedforward.calculate(velocity);
@@ -150,7 +158,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     SmartDashboard.putNumber(
         "Elevator position inches", Units.metersToInches(getElevatorPosition()));
     SmartDashboard.putNumber("Elevator Current Draw", elevatorMotor.getSupplyCurrent());
-    SmartDashboard.putBoolean("Elevator limit switch (closed is false)", zeroLimitSwitch.get());
+    // SmartDashboard.putBoolean("Elevator limit switch (closed is false)", zeroLimitSwitch.get());
   }
 
   public void logInit() {
@@ -234,7 +242,7 @@ public class Elevator extends SubsystemBase implements CANTestable, Loggable {
     elevatorMotor = new WPI_TalonFX(kElevatorMasterID);
     elevatorMotor.setInverted(true);
     elevatorMotor.setNeutralMode(NeutralMode.Brake);
-    zeroLimitSwitch = new DigitalInput(kElevatorLimitSwitchDIO);
+    // zeroLimitSwitch = new DigitalInput(kElevatorLimitSwitchDIO);
 
     elevatorLigament =
         new MechanismLigament2d(

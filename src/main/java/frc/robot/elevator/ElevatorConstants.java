@@ -15,7 +15,7 @@ import java.util.Map;
 public final class ElevatorConstants {
   public static final int kElevatorMasterID = 5;
   public static final int kElevatorFollowerID = 14;
-  public static final int kElevatorLimitSwitchDIO = 9;
+//   public static final int kElevatorLimitSwitchDIO = 9;
   public static final double kElevatorStartingPosition = 0.5;
   public static final double kElevatorAngleOffset = Units.degreesToRadians(35.4);
   public static final String kElevatorCANBus = "rio";
@@ -50,7 +50,7 @@ public final class ElevatorConstants {
 
   public static final double kDownSpeedVolts = -3;
   public static final double kElevatorCurrentThreshold = 64; // amps
-
+  public static final double kElevatorZeroCurrentThreshold = 64; // amps
   public static final double kDrumRadius = Units.inchesToMeters(0.94);
   public static final double kMinExtension = Units.inchesToMeters(0);
   public static final double kMaxExtension = Units.inchesToMeters(59);
