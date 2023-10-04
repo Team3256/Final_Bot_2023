@@ -7,63 +7,85 @@
 
 package frc.robot.intake.commands;
 
-import static frc.robot.Constants.FeatureFlags.*;
-import static frc.robot.Constants.VisionConstants.*;
-
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.arm.Arm;
-import frc.robot.arm.Arm.ArmPreset;
-import frc.robot.arm.commands.SetArmAngle;
 import frc.robot.elevator.Elevator;
-import frc.robot.elevator.commands.ZeroElevator;
-import frc.robot.helpers.ParentCommand;
+import frc.robot.elevator.commands.SetEndEffectorState;
+import frc.robot.elevator.commands.SetEndEffectorState.EndEffectorPreset;
+import frc.robot.elevator.commands.StowEndEffector;
+import frc.robot.helpers.DebugCommandBase;
 import frc.robot.intake.Intake;
-import frc.robot.limelight.Limelight;
 import java.util.function.BooleanSupplier;
 
-public class GroundIntake extends ParentCommand {
+public class GroundIntake extends DebugCommandBase {
 
+  private EndEffectorPreset coneEndEffectorPreset;
   private Elevator elevatorSubsystem;
   private Arm armSubsystem;
   private Intake intakeSubsystem;
-
   private BooleanSupplier isCurrentPieceCone;
+
+  public enum ConeOrientation {
+    SITTING_CONE,
+    STANDING_CONE,
+  }
+
+  public GroundIntake(
+      Elevator elevatorSubsystem,
+      Arm armSubsystem,
+      Intake intakeSubsystem,
+      ConeOrientation coneOrientation,
+      BooleanSupplier isCurrentPieceCone) {
+    this.elevatorSubsystem = elevatorSubsystem;
+    this.armSubsystem = armSubsystem;
+    this.intakeSubsystem = intakeSubsystem;
+    this.isCurrentPieceCone = isCurrentPieceCone;
+    this.coneEndEffectorPreset =
+        coneOrientation == ConeOrientation.SITTING_CONE
+            ? EndEffectorPreset.SITTING_CONE_GROUND_INTAKE
+            : EndEffectorPreset.STANDING_CONE_GROUND_INTAKE;
+
+    addRequirements(elevatorSubsystem, armSubsystem, intakeSubsystem);
+  }
 
   public GroundIntake(
       Elevator elevatorSubsystem,
       Arm armSubsystem,
       Intake intakeSubsystem,
       BooleanSupplier isCurrentPieceCone) {
-    this.elevatorSubsystem = elevatorSubsystem;
-    this.armSubsystem = armSubsystem;
-    this.intakeSubsystem = intakeSubsystem;
-    this.isCurrentPieceCone = isCurrentPieceCone;
+    this(
+        elevatorSubsystem,
+        armSubsystem,
+        intakeSubsystem,
+        ConeOrientation.STANDING_CONE,
+        isCurrentPieceCone);
   }
 
   @Override
   public void initialize() {
-    if (kGamePieceDetection) {
-      Limelight.setPipelineIndex(
-          FrontConstants.kLimelightNetworkTablesName, kDetectorPipelineIndex);
-      isCurrentPieceCone =
-          () -> Limelight.isConeDetected(FrontConstants.kLimelightNetworkTablesName);
-    }
-
-    addChildCommands(
-        new ZeroElevator(elevatorSubsystem),
-        new ConditionalCommand(
-            new SetArmAngle(armSubsystem, ArmPreset.CONE_GROUND_INTAKE),
-            new SetArmAngle(armSubsystem, ArmPreset.CUBE_GROUND_INTAKE),
-            isCurrentPieceCone),
-        new ConditionalCommand(
-            new IntakeCone(intakeSubsystem), new IntakeCube(intakeSubsystem), isCurrentPieceCone));
-
     super.initialize();
-  }
+    Command setArmElevatorToPreset =
+        Commands.either(
+            new SetEndEffectorState(elevatorSubsystem, armSubsystem, coneEndEffectorPreset),
+            new SetEndEffectorState(
+                elevatorSubsystem, armSubsystem, EndEffectorPreset.CUBE_GROUND_INTAKE),
+            isCurrentPieceCone);
 
-  @Override
-  public void end(boolean interrupted) {
-    Limelight.setPipelineIndex(FrontConstants.kLimelightNetworkTablesName, kDefaultPipeline);
-    super.end(interrupted);
+    Command intakeAndStow =
+        Commands.either(
+                new IntakeCone(intakeSubsystem),
+                new IntakeCube(intakeSubsystem),
+                isCurrentPieceCone)
+            .andThen(
+                Commands.deadline(
+                    new StowEndEffector(elevatorSubsystem, armSubsystem, isCurrentPieceCone)
+                        .asProxy(),
+                    new ConditionalCommand(
+                            new IntakeCone(intakeSubsystem).repeatedly(),
+                            new InstantCommand(),
+                            isCurrentPieceCone)
+                        .asProxy()));
+
+    Commands.sequence(setArmElevatorToPreset, intakeAndStow.asProxy()).schedule();
   }
 }

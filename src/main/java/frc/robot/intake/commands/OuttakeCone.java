@@ -15,6 +15,7 @@ import frc.robot.led.LED;
 public class OuttakeCone extends DebugCommandBase {
   private Intake intakeSubsystem;
   private LED ledSubsystem;
+  private double outtakeTime = 1;
   private Timer timer;
 
   public OuttakeCone(Intake intakeSubsystem) {
@@ -23,11 +24,9 @@ public class OuttakeCone extends DebugCommandBase {
     addRequirements(intakeSubsystem);
   }
 
-  public OuttakeCone(Intake intakeSubsystem, LED ledSubsystem) {
-    this.intakeSubsystem = intakeSubsystem;
-    this.ledSubsystem = ledSubsystem;
-    this.timer = new Timer();
-    addRequirements(intakeSubsystem);
+  public OuttakeCone(Intake intakeSubsystem, double outtakeTime) {
+    this(intakeSubsystem);
+    this.outtakeTime = outtakeTime;
   }
 
   @Override
@@ -45,6 +44,6 @@ public class OuttakeCone extends DebugCommandBase {
 
   @Override
   public boolean isFinished() {
-    return timer.hasElapsed(1.0);
+    return timer.hasElapsed(outtakeTime);
   }
 }

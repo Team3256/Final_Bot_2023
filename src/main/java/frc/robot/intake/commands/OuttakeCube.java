@@ -15,6 +15,7 @@ import frc.robot.led.LED;
 public class OuttakeCube extends DebugCommandBase {
   private Intake intakeSubsystem;
   private LED ledSubsystem;
+  private double outtakeTime = 1;
   private Timer timer;
 
   public OuttakeCube(Intake intakeSubsystem) {
@@ -23,11 +24,9 @@ public class OuttakeCube extends DebugCommandBase {
     addRequirements(intakeSubsystem);
   }
 
-  public OuttakeCube(Intake intakeSubsystem, LED ledSubsystem) {
-    this.intakeSubsystem = intakeSubsystem;
-    this.ledSubsystem = ledSubsystem;
-    this.timer = new Timer();
-    addRequirements(intakeSubsystem);
+  public OuttakeCube(Intake intakeSubsystem, double outtakeTime) {
+    this(intakeSubsystem);
+    this.outtakeTime = outtakeTime;
   }
 
   @Override
@@ -45,6 +44,6 @@ public class OuttakeCube extends DebugCommandBase {
 
   @Override
   public boolean isFinished() {
-    return timer.hasElapsed(1.0);
+    return timer.hasElapsed(outtakeTime);
   }
 }

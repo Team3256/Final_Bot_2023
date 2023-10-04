@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "coneHigh",
+          "coneMid",
           "outtakeCone"
         ],
         "executionBehavior": "sequential",
@@ -153,15 +153,9 @@
   "isReversed": null,
   "markers": [
     {
-      "position": 0.4,
+      "position": 1.55,
       "names": [
-        "intakeCube"
-      ]
-    },
-    {
-      "position": 1.5457597212357932,
-      "names": [
-        "cubeHigh"
+        "cubeMid"
       ]
     },
     {
@@ -171,15 +165,15 @@
       ]
     },
     {
-      "position": 2.4,
+      "position": 2.05,
       "names": [
         "intakeCube"
       ]
     },
     {
-      "position": 3.7,
+      "position": 3.6,
       "names": [
-        "cubeMid"
+        "cubeLow"
       ]
     },
     {
@@ -191,17 +185,11 @@
     {
       "position": 0.01,
       "names": [
-        "stow"
+        "intakeCube"
       ]
     },
     {
       "position": 1.05,
-      "names": [
-        "stow"
-      ]
-    },
-    {
-      "position": 2.05,
       "names": [
         "stow"
       ]

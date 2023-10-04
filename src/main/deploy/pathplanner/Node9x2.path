@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "coneHigh",
+          "coneMid",
           "outtakeCone"
         ],
         "executionBehavior": "sequential",
@@ -106,25 +106,31 @@
     }
   ],
   "maxVelocity": 7.0,
-  "maxAcceleration": 5.0,
+  "maxAcceleration": 3.0,
   "isReversed": null,
   "markers": [
     {
-      "position": 0.4,
-      "names": [
-        "intakeCube"
-      ]
-    },
-    {
       "position": 0.01,
       "names": [
-        "stow"
+        "intakeCube"
       ]
     },
     {
       "position": 1.05,
       "names": [
         "stow"
+      ]
+    },
+    {
+      "position": 1.6,
+      "names": [
+        "cubeMid"
+      ]
+    },
+    {
+      "position": 2.0,
+      "names": [
+        "outtakeCube"
       ]
     }
   ]

@@ -8,38 +8,30 @@
 package frc.robot.helpers;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import java.util.ArrayList;
-import java.util.Arrays;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class ParentCommand extends DebugCommandBase {
-  private ArrayList<Command> childCommands = new ArrayList<>();
+  private Command childCommands = Commands.none();
 
   protected void addChildCommands(Command... commands) {
-    childCommands.addAll(Arrays.asList(commands));
+    childCommands = new ParallelCommandGroup(commands);
   }
 
   @Override
   public void initialize() {
-    for (Command childCommand : childCommands) {
-      childCommand.schedule();
-    }
     super.initialize();
+    childCommands.schedule();
   }
 
   @Override
   public void end(boolean interrupted) {
     super.end(interrupted);
-    for (Command childCommand : childCommands) {
-      System.out.println("Parent killing child " + childCommand.getName());
-      childCommand.cancel();
-    }
+    childCommands.cancel();
   }
 
   @Override
   public boolean isFinished() {
-    for (Command childCommand : childCommands) {
-      if (!childCommand.isFinished()) return false;
-    }
-    return true;
+    return childCommands.isFinished();
   }
 }

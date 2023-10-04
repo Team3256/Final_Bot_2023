@@ -14,11 +14,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
+import frc.robot.Constants;
 import frc.robot.arm.Arm;
 import frc.robot.arm.Arm.ArmPreset;
-import frc.robot.auto.AutoConstants;
 
 public class SetArmAngle extends ProfiledPIDCommand {
   private Arm armSubsystem;
@@ -34,11 +34,7 @@ public class SetArmAngle extends ProfiledPIDCommand {
    */
   public SetArmAngle(Arm armSubsystem, Rotation2d angleRotation2d) {
     super(
-        new ProfiledPIDController(
-            Preferences.getDouble(ArmPreferencesKeys.kPKey, kArmP),
-            Preferences.getDouble(ArmPreferencesKeys.kIKey, kArmI),
-            Preferences.getDouble(ArmPreferencesKeys.kDKey, kArmD),
-            kArmProfileContraints),
+        new ProfiledPIDController(kArmP, kArmI, kArmD, kArmProfileContraints),
         armSubsystem::getArmPositionGroundRelative,
         MathUtil.clamp(
             angleRotation2d.getRadians() + kElevatorAngleOffset,
@@ -78,7 +74,7 @@ public class SetArmAngle extends ProfiledPIDCommand {
       getController().setGoal(angleRotation + kElevatorAngleOffset);
     }
 
-    if (AutoConstants.kAutoDebug) {
+    if (Constants.kDebugEnabled) {
       System.out.println(
           this.getName()
               + " started (preset: "
@@ -93,17 +89,31 @@ public class SetArmAngle extends ProfiledPIDCommand {
   }
 
   @Override
+  public void execute() {
+    super.execute();
+    SmartDashboard.putNumber(
+        "Arm setpoint", Units.radiansToDegrees(getController().getSetpoint().position));
+    SmartDashboard.putNumber(
+        "Arm position", Units.radiansToDegrees(armSubsystem.getArmPositionGroundRelative()));
+  }
+
+  @Override
   public void end(boolean interrupted) {
     super.end(interrupted);
     armSubsystem.off();
-    if (AutoConstants.kAutoDebug) {
+    if (Constants.kDebugEnabled) {
       System.out.println(
           this.getName()
               + " ended (preset: "
               + armPreset
+              + ", current arm rotation elevator relative: "
+              + Units.radiansToDegrees(armSubsystem.getArmPositionElevatorRelative())
+              + " deg, "
               + ", rotation: "
               + Units.radiansToDegrees(angleRotation)
-              + " deg)");
+              + " deg, interrupted: "
+              + interrupted
+              + ")");
     }
   }
 

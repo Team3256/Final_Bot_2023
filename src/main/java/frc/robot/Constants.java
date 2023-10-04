@@ -17,21 +17,22 @@ import java.util.Map;
 
 public final class Constants {
   public static final boolean kDebugEnabled = true;
+  public static final boolean kCommandDebugLogEnabled = true;
   public static final boolean kSwerveEnabled = true;
   public static final boolean kClimbEnabled = false;
-  public static final boolean kIntakeEnabled = false;
-  public static final boolean kElevatorEnabled = false;
+  public static final boolean kIntakeEnabled = true;
+  public static final boolean kElevatorEnabled = true;
   public static final boolean kArmEnabled = true;
   public static final boolean kLedStripEnabled = true;
 
   public static final boolean kAdvantageKitReplayEnabled = false;
-  public static final boolean kCompetitionModeEnabled = true;
-  public static final RobotType kRobotType = RobotType.ALPHA;
+
+  public static final RobotType kRobotType = RobotType.FINAL;
   public static final RobotMode kCurrentMode = RobotMode.SIM;
+
 
   public static final double kStickDeadband = 0.05;
   public static final double kStickCancelDeadband = 0.50;
-  public static final double kStickRotationThreshold = 0.3;
   public static final double kAzimuthStickDeadband = 0.3;
 
   /* Swerve Logging */
@@ -40,21 +41,26 @@ public final class Constants {
   public static final Field2d swerveViewer = new Field2d();
 
   public static final class FeatureFlags {
-    public static final boolean kAutoScoreEnabled = true;
-    public static final boolean kAutoOuttakeEnabled = true;
+    public static final boolean kUsePrefs = false;
+    public static final boolean kCalibrationMode = false;
 
-    public static final boolean kOperatorManualArmControlEnabled = true;
-    public static final boolean kArmAbsoluteEncoderEnabled = true;
-    public static final boolean kLocalizationEnabled = true;
-    public static final boolean kSwerveAccelerationLimitingEnabled = true;
-    public static final boolean kLocalizationStdDistanceBased = true;
-
-    public static final boolean kLocalizationDataCollectionMode = false;
+    public static final boolean kAutoScoreEnabled = false;
+    public static final boolean kAutoOuttakeEnabled = false;
     public static final boolean kIntakeAutoScoreDistanceSensorOffset = false;
-    public static final boolean kShuffleboardLayoutEnabled = false;
-    public static final boolean kGamePieceDetection = false;
-    public static final boolean kUsePrefs = true;
+
+    public static final boolean kOperatorManualArmControlEnabled = false;
+    public static final boolean kUseAbsoluteEncoderToInitializeRelative = false;
+    public static final boolean kUseRelativeArmEncoder = true;
+
+    public static final boolean kLocalizationStdDistanceBased = true;
+    public static final boolean kLocalizationDataCollectionMode = false;
+    public static final boolean kLocalizeDuringAuto = true;
     public static final boolean kDynamicPathGenEnabled = false;
+
+    public static final boolean kShuffleboardLayoutEnabled = true;
+    public static final boolean kSwerveAccelerationLimitingEnabled = false;
+    public static final boolean kGamePieceDetection = false;
+
     public static final boolean kPitRoutineEnabled = false;
     public static final boolean kCanTestEnabled = false;
   }
@@ -67,7 +73,7 @@ public final class Constants {
     public static final String kSwerveLayoutName = "Swerve";
     public static final String kArmLayoutName = "Arm";
     public static final String kElevatorLayoutName = "Elevator";
-    public static final String kLEDLayoutName = "LED_Old";
+    public static final String kLEDLayoutName = "LED";
   }
 
   public enum RobotMode {
@@ -337,19 +343,20 @@ public final class Constants {
   public static class VisionConstants {
     // TODO: set the indexes
     public static final int kDefaultPipeline = 0;
-
     public static final int kDetectorPipelineIndex = 1;
+    public static final double kMaxValidDistanceFromAprilTagTeleop = 3.5;
+    public static final double kMaxValidDistanceFromAprilTagAuto = 1.5;
 
-    public static class FrontConstants {
-      public static final String kLimelightNetworkTablesName = "limelight-front";
-    }
-
-    public static class BackConstants {
-      public static final String kLimelightNetworkTablesName = "limelight-back";
-    }
-
-    public static class SideConstants {
+    public static class RightConstants {
       public static final String kLimelightNetworkTablesName = "limelight-right";
+    }
+
+    public static class LeftConstants {
+      public static final String kLimelightNetworkTablesName = "limelight-left";
+    }
+
+    public static class MiddleConstants {
+      public static final String kLimelightNetworkTablesName = "limelight-middle";
     }
   }
 }

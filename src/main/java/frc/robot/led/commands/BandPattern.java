@@ -11,26 +11,26 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.led.LED;
 import java.awt.Color;
 
-public class SetAllColor extends CommandBase {
+public class BandPattern extends CommandBase {
   private Color color;
 
-  public SetAllColor(LED ledSubsystem, Color color) {
+  public BandPattern(LED ledSubsystem, Color color) {
     this.color = color;
     addRequirements(ledSubsystem);
   }
 
   @Override
   public void initialize() {
-    LED.LEDSegment.MainStrip.setColor(color);
-  }
-
-  @Override
-  public boolean runsWhenDisabled() {
-    return true;
+    LED.LEDSegment.MainStrip.setBandAnimation(color, 0.5);
   }
 
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
   }
 }
