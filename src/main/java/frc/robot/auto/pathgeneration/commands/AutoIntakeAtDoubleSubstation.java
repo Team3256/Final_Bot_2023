@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import frc.robot.arm.Arm;
 import frc.robot.auto.dynamicpathgeneration.helpers.PathUtil;
 import frc.robot.auto.pathgeneration.PathGeneration;
 import frc.robot.elevator.Elevator;
@@ -44,7 +43,6 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
   private SwerveDrive swerveSubsystem;
   private Intake intakeSubsystem;
   private Elevator elevatorSubsystem;
-  private Arm armSubsystem;
   private LED ledSubsystem;
   private Supplier<SubstationLocation> substationLocation;
   private BooleanSupplier cancelCommand;
@@ -55,7 +53,6 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
       SwerveDrive swerveDrive,
       Intake intakeSubsystem,
       Elevator elevatorSubsystem,
-      Arm armSubsystem,
       LED ledSubsystem,
       Supplier<SubstationLocation> substationLocation,
       BooleanSupplier cancelCommand,
@@ -65,7 +62,6 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
     this.swerveSubsystem = swerveDrive;
     this.intakeSubsystem = intakeSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
-    this.armSubsystem = armSubsystem;
     this.ledSubsystem = ledSubsystem;
     this.substationLocation = substationLocation;
     this.isAutoScoreMode = isAutoScoreMode;
@@ -85,13 +81,11 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
               new ParallelCommandGroup(
                   new SetEndEffectorState(
                       elevatorSubsystem,
-                      armSubsystem,
                       SetEndEffectorState.EndEffectorPreset.DOUBLE_SUBSTATION_CONE),
                   new IntakeCone(intakeSubsystem, ledSubsystem)),
               new ParallelCommandGroup(
                   new SetEndEffectorState(
                       elevatorSubsystem,
-                      armSubsystem,
                       SetEndEffectorState.EndEffectorPreset.DOUBLE_SUBSTATION_CUBE),
                   new IntakeCube(intakeSubsystem, ledSubsystem)),
               isCurrentPieceCone)
@@ -142,11 +136,9 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
             new ConditionalCommand(
                 new SetEndEffectorState(
                     elevatorSubsystem,
-                    armSubsystem,
                     SetEndEffectorState.EndEffectorPreset.DOUBLE_SUBSTATION_CONE),
                 new SetEndEffectorState(
                     elevatorSubsystem,
-                    armSubsystem,
                     SetEndEffectorState.EndEffectorPreset.DOUBLE_SUBSTATION_CUBE),
                 isCurrentPieceCone));
 
@@ -159,8 +151,7 @@ public class AutoIntakeAtDoubleSubstation extends ParentCommand {
         PathGeneration.createDynamicAbsolutePath(
             substationWaypoint, end, swerveSubsystem, kPathToDestinationConstraints);
 
-    Command stowArmElevator =
-        new StowEndEffector(elevatorSubsystem, armSubsystem, isCurrentPieceCone);
+    Command stowArmElevator = new StowEndEffector(elevatorSubsystem, isCurrentPieceCone);
 
     Command runningLEDs =
         new ConditionalCommand(

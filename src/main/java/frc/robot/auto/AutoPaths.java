@@ -12,9 +12,6 @@ import static frc.robot.auto.AutoConstants.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.arm.Arm;
-import frc.robot.arm.Arm.ArmPreset;
-import frc.robot.arm.commands.SetArmAngle;
 import frc.robot.auto.helpers.AutoBuilder;
 import frc.robot.auto.helpers.AutoChooser;
 import frc.robot.elevator.Elevator;
@@ -38,7 +35,6 @@ public class AutoPaths {
   private SwerveDrive swerveSubsystem;
   private Intake intakeSubsystem;
   private Elevator elevatorSubsystem;
-  private Arm armSubsystem;
   private BooleanSupplier isCurrentPieceCone;
   private HashMap<String, Supplier<Command>> autoEventMap = new HashMap<>();
 
@@ -46,12 +42,10 @@ public class AutoPaths {
       SwerveDrive swerveSubsystem,
       Intake intakeSubsystem,
       Elevator elevatorSubsystem,
-      Arm armSubsystem,
       BooleanSupplier isCurrentPieceCone) {
     this.swerveSubsystem = swerveSubsystem;
     this.intakeSubsystem = intakeSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
-    this.armSubsystem = armSubsystem;
     this.isCurrentPieceCone = isCurrentPieceCone;
   }
 
@@ -66,10 +60,7 @@ public class AutoPaths {
                 .asProxy()
                 .withName("engage"));
 
-    if (swerveSubsystem != null
-        && intakeSubsystem != null
-        && armSubsystem != null
-        && elevatorSubsystem != null) {
+    if (swerveSubsystem != null && intakeSubsystem != null && elevatorSubsystem != null) {
 
       autoEventMap.put("outtakeCube", () -> new OuttakeCube(intakeSubsystem).asProxy());
 
@@ -79,9 +70,7 @@ public class AutoPaths {
           "coneHigh",
           () ->
               new SetEndEffectorState(
-                      elevatorSubsystem,
-                      armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_CONE_HIGH)
+                      elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CONE_HIGH)
                   .asProxy()
                   .withName("coneHigh"));
 
@@ -89,9 +78,7 @@ public class AutoPaths {
           "coneMid",
           () ->
               new SetEndEffectorState(
-                      elevatorSubsystem,
-                      armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_CONE_MID)
+                      elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CONE_MID)
                   .asProxy()
                   .withName("coneMid"));
 
@@ -99,9 +86,7 @@ public class AutoPaths {
           "coneLow",
           () ->
               new SetEndEffectorState(
-                      elevatorSubsystem,
-                      armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
+                      elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
                   .asProxy()
                   .withName("coneLow"));
 
@@ -109,9 +94,7 @@ public class AutoPaths {
           "cubeHigh",
           () ->
               new SetEndEffectorState(
-                      elevatorSubsystem,
-                      armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_HIGH)
+                      elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_HIGH)
                   .asProxy()
                   .withName("cubeHigh"));
 
@@ -119,9 +102,7 @@ public class AutoPaths {
           "cubeMid",
           () ->
               new SetEndEffectorState(
-                      elevatorSubsystem,
-                      armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_MID)
+                      elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_CUBE_MID)
                   .asProxy()
                   .withName("cubeMid"));
 
@@ -129,9 +110,7 @@ public class AutoPaths {
           "cubeLow",
           () ->
               new SetEndEffectorState(
-                      elevatorSubsystem,
-                      armSubsystem,
-                      SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
+                      elevatorSubsystem, SetEndEffectorState.EndEffectorPreset.SCORE_ANY_LOW)
                   .asProxy()
                   .withName("cubeLow"));
 
@@ -140,7 +119,7 @@ public class AutoPaths {
           () ->
               runParallelWithPath(
                   Commands.parallel(
-                          new StowEndEffector(elevatorSubsystem, armSubsystem, isCurrentPieceCone),
+                          new StowEndEffector(elevatorSubsystem, isCurrentPieceCone),
                           new IntakeOff(intakeSubsystem))
                       .asProxy()
                       .withName("stow")));
@@ -150,7 +129,7 @@ public class AutoPaths {
           () ->
               runParallelWithPath(
                   Commands.parallel(
-                          new StowEndEffector(elevatorSubsystem, armSubsystem, isCurrentPieceCone),
+                          new StowEndEffector(elevatorSubsystem, isCurrentPieceCone),
                           new IntakeOff(intakeSubsystem))
                       .asProxy()
                       .withName("stow")));
@@ -159,25 +138,23 @@ public class AutoPaths {
           "intakeCone",
           () ->
               runParallelWithPath(
-                      Commands.deadline(
-                          new IntakeCone(intakeSubsystem),
-                          new SetElevatorExtension(
-                              elevatorSubsystem, Elevator.ElevatorPreset.GROUND_INTAKE),
-                          new SetArmAngle(armSubsystem, ArmPreset.CONE_GROUND_INTAKE)))
-                  .asProxy()
-                  .withName("intakeCone"));
+                  Commands.deadline(
+                      new IntakeCone(intakeSubsystem),
+                      new SetElevatorExtension(
+                              elevatorSubsystem, Elevator.ElevatorPreset.GROUND_INTAKE)
+                          .asProxy()
+                          .withName("intakeCone"))));
 
       autoEventMap.put(
           "intakeCube",
           () ->
               runParallelWithPath(
-                      Commands.deadline(
-                          new IntakeCube(intakeSubsystem),
-                          new SetElevatorExtension(
-                              elevatorSubsystem, Elevator.ElevatorPreset.GROUND_INTAKE),
-                          new SetArmAngle(armSubsystem, ArmPreset.CUBE_GROUND_INTAKE)))
-                  .asProxy()
-                  .withName("intakeCube"));
+                  Commands.deadline(
+                      new IntakeCube(intakeSubsystem),
+                      new SetElevatorExtension(
+                              elevatorSubsystem, Elevator.ElevatorPreset.GROUND_INTAKE)
+                          .asProxy()
+                          .withName("intakeCube"))));
     }
 
     AutoBuilder autoBuilder = new AutoBuilder(swerveSubsystem, autoEventMap);

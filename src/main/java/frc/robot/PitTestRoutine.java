@@ -11,14 +11,11 @@ import static frc.robot.Constants.*;
 import static frc.robot.elevator.ElevatorConstants.kElevatorStartingPosition;
 import static frc.robot.swerve.SwerveConstants.*;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.arm.Arm;
-import frc.robot.arm.commands.SetArmAngle;
 import frc.robot.elevator.Elevator;
 import frc.robot.elevator.commands.SetElevatorExtension;
 import frc.robot.elevator.commands.ZeroElevator;
@@ -33,18 +30,13 @@ public class PitTestRoutine {
   Elevator elevatorSubsystem;
   Intake intakeSubsystem;
   SwerveDrive swerveSubsystem;
-  Arm armSubsystem;
   private final CommandXboxController driver = new CommandXboxController(0);
 
   public PitTestRoutine(
-      Elevator elevatorSubsystem,
-      Intake intakeSubsystem,
-      SwerveDrive swerveSubsystem,
-      Arm armSubsystem) {
+      Elevator elevatorSubsystem, Intake intakeSubsystem, SwerveDrive swerveSubsystem) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.intakeSubsystem = intakeSubsystem;
     this.swerveSubsystem = swerveSubsystem;
-    this.armSubsystem = armSubsystem;
   }
 
   public void runPitRoutine() {
@@ -58,9 +50,6 @@ public class PitTestRoutine {
 
     if (kIntakeEnabled) {
       intakeTests = intakeCommands();
-    }
-    if (kArmEnabled) {
-      armTests = armCommands();
     }
     if (kSwerveEnabled) {
       swerveTests = swerveCommands();
@@ -106,18 +95,6 @@ public class PitTestRoutine {
     Command outtakeCube = new IntakeCone(intakeSubsystem).until(driver.b());
 
     return new SequentialCommandGroup(intakeCone, outtakeCone, intakeCube, outtakeCube);
-  }
-
-  public Command armCommands() {
-    Command setArmAngleHorizontal =
-        new SetArmAngle(armSubsystem, Rotation2d.fromDegrees(0)).until(driver.b());
-    Command setArmAngleHalfway =
-        new SetArmAngle(armSubsystem, Rotation2d.fromDegrees(45)).until(driver.b());
-    Command setArmAngleVertical =
-        new SetArmAngle(armSubsystem, Rotation2d.fromDegrees(90)).until(driver.b());
-
-    return new SequentialCommandGroup(
-        setArmAngleHorizontal, setArmAngleHalfway, setArmAngleVertical);
   }
 
   public Command swerveCommands() {
